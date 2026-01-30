@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [linux-x64, linux-arm64, macos-x64, macos-arm64, win-x64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Publish
+        run: |
+          dotnet publish CLImate.App -c Release -r ${{ matrix.rid }} \
+            -p:PublishSingleFile=true \
+            -p:SelfContained=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -o dist/${{ matrix.rid }}
+
+      - name: Package
+        run: |
+          BIN_NAME=climate
+          EXT=tar.gz
+          if [[ "${{ matrix.rid }}" == win-* ]]; then
+            BIN_NAME=climate.exe
+            EXT=zip
+          fi
+
+          if [[ ! -f dist/${{ matrix.rid }}/$BIN_NAME ]]; then
+            echo "Missing binary for ${{ matrix.rid }}" >&2
+            exit 1
+          fi
+
+          if [[ "$EXT" == "zip" ]]; then
+            (cd dist/${{ matrix.rid }} && zip -q "../climate-${{ matrix.rid%%-* }}-${{ matrix.rid#*- }}.zip" "$BIN_NAME")
+          else
+            (cd dist/${{ matrix.rid }} && tar -czf "../climate-${{ matrix.rid%%-* }}-${{ matrix.rid#*- }}.tar.gz" "$BIN_NAME")
+          fi
+
+      - name: Upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/climate-*

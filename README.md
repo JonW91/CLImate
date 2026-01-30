@@ -43,3 +43,41 @@ Forecast:
 ## Notes
 
 - Weather warnings are not implemented yet (planned for a future release).
+
+## Install (no runtime required)
+
+You can install a platform-specific, self-contained binary that does not require .NET to be installed.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/JonW91/CLImate/main/scripts/install.sh | sh
+```
+
+The installer auto-detects OS/architecture and downloads the matching release asset.
+
+For Windows PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/JonW91/CLImate/main/scripts/install.ps1 | iex
+```
+
+### Release assets naming
+
+```
+climate-linux-x64.tar.gz
+climate-linux-arm64.tar.gz
+climate-macos-x64.tar.gz
+climate-macos-arm64.tar.gz
+climate-windows-x64.zip
+```
+
+## Publishing binaries
+
+Use the helper script to build self-contained, single-file binaries:
+
+```bash
+./scripts/publish.sh
+```
+
+## Releases
+
+Push a tag like `v0.1.0` to trigger a GitHub Actions build and attach binaries.

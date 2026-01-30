@@ -22,6 +22,7 @@ if (args.Any(a => a is "-h" or "--help"))
 
 var units = Units.Metric;
 var locationParts = new List<string>();
+var showArt = true;
 
 for (var i = 0; i < args.Length; i++)
 {
@@ -32,6 +33,12 @@ for (var i = 0; i < args.Length; i++)
         {
             units = ParseUnits(args[++i]);
         }
+        continue;
+    }
+
+    if (arg is "--no-art")
+    {
+        showArt = false;
         continue;
     }
 
@@ -99,7 +106,7 @@ if (forecast?.Daily == null || forecast.Daily.Time == null || forecast.Daily.Tim
     return;
 }
 
-PrintDailyForecast(forecast);
+PrintDailyForecast(forecast, showArt);
 
 Console.WriteLine();
 Console.WriteLine("Weather warnings: Not available yet (planned).");
@@ -135,6 +142,7 @@ static void PrintHelp()
     Console.WriteLine();
     Console.WriteLine("Options:");
     Console.WriteLine("  -u, --units <metric|imperial>   Units for output (default: metric)");
+    Console.WriteLine("  --no-art                       Disable ASCII art (use text labels)");
 }
 
 static GeoResult? PickLocation(List<GeoResult> results)
@@ -174,7 +182,7 @@ static string FormatPlace(GeoResult result)
     return string.Join(", ", parts);
 }
 
-static void PrintDailyForecast(ForecastResponse forecast)
+static void PrintDailyForecast(ForecastResponse forecast, bool showArt)
 {
     var daily = forecast.Daily!;
     var units = forecast.DailyUnits ?? new DailyUnits();
@@ -186,17 +194,20 @@ static void PrintDailyForecast(ForecastResponse forecast)
     for (var i = 0; i < daily.Time.Count; i++)
     {
         var date = daily.Time[i];
-        var code = SafeGet(daily.WeatherCode, i, 0);
-        var (desc, art) = DescribeWeather(code);
+        var code = SafeGetInt(daily.WeatherCode, i, 0);
+        var (desc, art) = DescribeWeather(code, showArt);
 
-        var max = SafeGet(daily.TemperatureMax, i, double.NaN);
-        var min = SafeGet(daily.TemperatureMin, i, double.NaN);
-        var precip = SafeGet(daily.PrecipitationSum, i, double.NaN);
-        var wind = SafeGet(daily.WindSpeedMax, i, double.NaN);
-        var gust = SafeGet(daily.WindGustsMax, i, double.NaN);
+        var max = SafeGetDouble(daily.TemperatureMax, i, double.NaN);
+        var min = SafeGetDouble(daily.TemperatureMin, i, double.NaN);
+        var precip = SafeGetDouble(daily.PrecipitationSum, i, double.NaN);
+        var wind = SafeGetDouble(daily.WindSpeedMax, i, double.NaN);
+        var gust = SafeGetDouble(daily.WindGustsMax, i, double.NaN);
 
         Console.WriteLine($"{date}  {desc}");
-        Console.WriteLine(art);
+        if (!string.IsNullOrWhiteSpace(art))
+        {
+            Console.WriteLine(art);
+        }
         Console.WriteLine($"  High/Low: {FormatValue(max)}{units.TemperatureMax} / {FormatValue(min)}{units.TemperatureMin}");
         Console.WriteLine($"  Precip:   {FormatValue(precip)}{units.PrecipitationSum}");
         Console.WriteLine($"  Wind:     {FormatValue(wind)}{units.WindSpeedMax} (gusts {FormatValue(gust)}{units.WindGustsMax})");
@@ -204,26 +215,39 @@ static void PrintDailyForecast(ForecastResponse forecast)
     }
 }
 
-static (string Description, string Art) DescribeWeather(int code)
+static (string Description, string Art) DescribeWeather(int code, bool showArt)
 {
-    return code switch
+    var (description, key) = code switch
     {
-        0 => ("Clear sky", "   \\   /\n    .-.\n -- ( ) --\n    `-'\n   /   \\"),
-        1 or 2 => ("Mainly clear, partly cloudy", "   \\  /\n _ /\"\".-\n   \\_(   ).\n   /(___(__)\n          "),
-        3 => ("Overcast", "    .--.\n .-(    ).\n(___.__)__)\n          "),
-        45 or 48 => ("Fog", " _ - _ - _\n  _ - _ -\n _ - _ - _"),
-        51 or 53 or 55 => ("Drizzle", "    .--.\n .-(    ).\n(___.__)__)\n  '  '  ' "),
-        56 or 57 => ("Freezing drizzle", "    .--.\n .-(    ).\n(___.__)__)\n  *  *  * "),
-        61 or 63 or 65 => ("Rain", "    .--.\n .-(    ).\n(___.__)__)\n  ' ' ' ' "),
-        66 or 67 => ("Freezing rain", "    .--.\n .-(    ).\n(___.__)__)\n  * * * * "),
-        71 or 73 or 75 => ("Snow", "    .--.\n .-(    ).\n(___.__)__)\n  *  *  * "),
-        77 => ("Snow grains", "    .--.\n .-(    ).\n(___.__)__)\n  *  .  * "),
-        80 or 81 or 82 => ("Rain showers", "    .--.\n .-(    ).\n(___.__)__)\n  ' ' '  "),
-        85 or 86 => ("Snow showers", "    .--.\n .-(    ).\n(___.__)__)\n  *  *   "),
-        95 => ("Thunderstorm", "    .--.\n .-(    ).\n(___.__)__)\n   /_/    "),
-        96 or 99 => ("Thunderstorm with hail", "    .--.\n .-(    ).\n(___.__)__)\n  * /_/  "),
-        _ => ("Unknown", "    .--.\n .-(    ).\n(___.__)__)")
+        0 => ("Clear sky", "clear"),
+        1 or 2 => ("Mainly clear, partly cloudy", "partly_cloudy"),
+        3 => ("Overcast", "overcast"),
+        45 or 48 => ("Fog", "fog"),
+        51 or 53 or 55 => ("Drizzle", "drizzle"),
+        56 or 57 => ("Freezing drizzle", "freezing_drizzle"),
+        61 or 63 or 65 => ("Rain", "rain"),
+        66 or 67 => ("Freezing rain", "freezing_rain"),
+        71 or 73 or 75 => ("Snow", "snow"),
+        77 => ("Snow grains", "snow_grains"),
+        80 or 81 or 82 => ("Rain showers", "rain_showers"),
+        85 or 86 => ("Snow showers", "snow_showers"),
+        95 => ("Thunderstorm", "thunderstorm"),
+        96 or 99 => ("Thunderstorm with hail", "thunderstorm_hail"),
+        _ => ("Unknown", "unknown")
     };
+
+    if (!showArt)
+    {
+        return (description, $"[ {key.Replace('_', ' ').ToUpperInvariant()} ]");
+    }
+
+    var art = AsciiArtCatalog.GetArt(key, GetTerminalWidth());
+    if (string.IsNullOrWhiteSpace(art))
+    {
+        return (description, $"[ {key.Replace('_', ' ').ToUpperInvariant()} ]");
+    }
+
+    return (description, art);
 }
 
 static string FormatValue(double value)
@@ -250,16 +274,87 @@ static string BuildUnitParameters(Units units)
     };
 }
 
-static int SafeGet(List<int>? list, int index, int fallback)
+static int SafeGetInt(List<int>? list, int index, int fallback)
 {
     if (list == null || index >= list.Count) return fallback;
     return list[index];
 }
 
-static double SafeGet(List<double>? list, int index, double fallback)
+static double SafeGetDouble(List<double>? list, int index, double fallback)
 {
     if (list == null || index >= list.Count) return fallback;
     return list[index];
+}
+
+static int? GetTerminalWidth()
+{
+    try
+    {
+        return Console.WindowWidth;
+    }
+    catch
+    {
+        return null;
+    }
+}
+
+static class AsciiArtCatalog
+{
+    private const int LargeMinWidth = 100;
+    private const int MediumMinWidth = 70;
+    private const int SmallMinWidth = 45;
+    private static AsciiArtSets? _sets;
+
+    public static string GetArt(string key, int? width)
+    {
+        if (width is null || width < SmallMinWidth)
+        {
+            return string.Empty;
+        }
+
+        var sets = _sets ??= LoadSets();
+        if (sets == null)
+        {
+            return string.Empty;
+        }
+
+        if (width >= LargeMinWidth && sets.Large.TryGetValue(key, out var large))
+        {
+            return string.Join('\n', large);
+        }
+
+        if (width >= MediumMinWidth && sets.Medium.TryGetValue(key, out var medium))
+        {
+            return string.Join('\n', medium);
+        }
+
+        if (sets.Small.TryGetValue(key, out var small))
+        {
+            return string.Join('\n', small);
+        }
+
+        return string.Empty;
+    }
+
+    private static AsciiArtSets? LoadSets()
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "Assets", "ascii-art.json");
+        if (!File.Exists(path))
+        {
+            return null;
+        }
+
+        var json = File.ReadAllText(path);
+        var sets = JsonSerializer.Deserialize<AsciiArtSets>(json);
+        return sets;
+    }
+}
+
+sealed class AsciiArtSets
+{
+    public Dictionary<string, string[]> Small { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<string, string[]> Medium { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<string, string[]> Large { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 
 sealed class GeocodeResponse

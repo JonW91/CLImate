@@ -23,6 +23,7 @@ if (args.Any(a => a is "-h" or "--help"))
 var units = Units.Metric;
 var locationParts = new List<string>();
 var showArt = true;
+string? countryCode = null;
 
 for (var i = 0; i < args.Length; i++)
 {
@@ -36,6 +37,15 @@ for (var i = 0; i < args.Length; i++)
         continue;
     }
 
+    if (arg is "--country" or "-c")
+    {
+        if (i + 1 < args.Length)
+        {
+            countryCode = NormalizeCountryCode(args[++i]);
+        }
+        continue;
+    }
+
     if (arg is "--no-art")
     {
         showArt = false;
@@ -45,6 +55,12 @@ for (var i = 0; i < args.Length; i++)
     if (arg.StartsWith("--units=", StringComparison.OrdinalIgnoreCase))
     {
         units = ParseUnits(arg.Substring("--units=".Length));
+        continue;
+    }
+
+    if (arg.StartsWith("--country=", StringComparison.OrdinalIgnoreCase))
+    {
+        countryCode = NormalizeCountryCode(arg.Substring("--country=".Length));
         continue;
     }
 
@@ -68,12 +84,23 @@ if (string.IsNullOrWhiteSpace(locationInput))
 }
 
 var geocode = await GetJsonAsync<GeocodeResponse>(http, options,
-    $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(locationInput)}&count=5&language=en&format=json");
+    $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(locationInput)}&count=5&language=en&format=json{BuildCountryCodeParameter(countryCode)}");
 
 if (geocode?.Results == null || geocode.Results.Count == 0)
 {
-    Console.WriteLine("No locations found. Try a more specific query.");
-    return;
+    var fallbackCode = countryCode ?? InferCountryCode(locationInput);
+    if (!string.IsNullOrWhiteSpace(fallbackCode))
+    {
+        var primaryName = ExtractPrimaryName(locationInput);
+        geocode = await GetJsonAsync<GeocodeResponse>(http, options,
+            $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(primaryName)}&count=5&language=en&format=json{BuildCountryCodeParameter(fallbackCode)}");
+    }
+
+    if (geocode?.Results == null || geocode.Results.Count == 0)
+    {
+        Console.WriteLine("No locations found. Try a more specific query or pass --country.");
+        return;
+    }
 }
 
 var selected = PickLocation(geocode.Results);
@@ -142,6 +169,7 @@ static void PrintHelp()
     Console.WriteLine();
     Console.WriteLine("Options:");
     Console.WriteLine("  -u, --units <metric|imperial>   Units for output (default: metric)");
+    Console.WriteLine("  -c, --country <code>            2-letter country code filter (e.g., GB, US)");
     Console.WriteLine("  --no-art                       Disable ASCII art (use text labels)");
 }
 
@@ -274,6 +302,54 @@ static string BuildUnitParameters(Units units)
     };
 }
 
+static string BuildCountryCodeParameter(string? countryCode)
+{
+    if (string.IsNullOrWhiteSpace(countryCode))
+    {
+        return string.Empty;
+    }
+
+    return $"&countryCode={Uri.EscapeDataString(countryCode)}";
+}
+
+static string ExtractPrimaryName(string input)
+{
+    var parts = input.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    return parts.Length > 0 ? parts[0] : input;
+}
+
+static string? NormalizeCountryCode(string? input)
+{
+    if (string.IsNullOrWhiteSpace(input))
+    {
+        return null;
+    }
+
+    var trimmed = input.Trim();
+    if (trimmed.Length == 2)
+    {
+        return trimmed.ToUpperInvariant();
+    }
+
+    return CountryNameToCode(trimmed);
+}
+
+static string? InferCountryCode(string input)
+{
+    var parts = input.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    if (parts.Length < 2)
+    {
+        return null;
+    }
+
+    return CountryNameToCode(parts[^1]);
+}
+
+static string? CountryNameToCode(string name)
+{
+    return CountryCodeCatalog.GetCode(name);
+}
+
 static int SafeGetInt(List<int>? list, int index, int fallback)
 {
     if (list == null || index >= list.Count) return fallback;
@@ -355,6 +431,91 @@ sealed class AsciiArtSets
     public Dictionary<string, string[]> Small { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, string[]> Medium { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, string[]> Large { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+}
+
+static class CountryCodeCatalog
+{
+    private static Dictionary<string, string>? _mappings;
+
+    public static string? GetCode(string name)
+    {
+        var key = name.Trim();
+        if (key.Length == 0)
+        {
+            return null;
+        }
+
+        var mappings = _mappings ??= LoadMappings();
+        return mappings.TryGetValue(key, out var code) ? code : null;
+    }
+
+    private static Dictionary<string, string> LoadMappings()
+    {
+        var mappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in DefaultMappings())
+        {
+            mappings[pair.Key] = pair.Value;
+        }
+
+        var path = Path.Combine(AppContext.BaseDirectory, "Assets", "country-codes.json");
+        if (!File.Exists(path))
+        {
+            return mappings;
+        }
+
+        var json = File.ReadAllText(path);
+        var custom = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+        if (custom == null)
+        {
+            return mappings;
+        }
+
+        foreach (var pair in custom)
+        {
+            var key = pair.Key?.Trim();
+            var value = pair.Value?.Trim().ToUpperInvariant();
+            if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
+            {
+                continue;
+            }
+
+            mappings[key] = value;
+        }
+
+        return mappings;
+    }
+
+    private static Dictionary<string, string> DefaultMappings()
+    {
+        return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["united states"] = "US",
+            ["usa"] = "US",
+            ["us"] = "US",
+            ["u.s."] = "US",
+            ["united kingdom"] = "GB",
+            ["uk"] = "GB",
+            ["u.k."] = "GB",
+            ["great britain"] = "GB",
+            ["britain"] = "GB",
+            ["scotland"] = "GB",
+            ["england"] = "GB",
+            ["wales"] = "GB",
+            ["northern ireland"] = "GB",
+            ["ireland"] = "IE",
+            ["eire"] = "IE",
+            ["canada"] = "CA",
+            ["australia"] = "AU",
+            ["new zealand"] = "NZ",
+            ["germany"] = "DE",
+            ["deutschland"] = "DE",
+            ["france"] = "FR",
+            ["spain"] = "ES",
+            ["espana"] = "ES",
+            ["italy"] = "IT",
+            ["italia"] = "IT"
+        };
+    }
 }
 
 sealed class GeocodeResponse

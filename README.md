@@ -81,3 +81,10 @@ Use the helper script to build self-contained, single-file binaries:
 ## Releases
 
 Push a tag like `v0.1.0` to trigger a GitHub Actions build and attach binaries.
+
+Create a release tag with:
+
+```bash
+./scripts/tag-release.sh 0.1.0
+git push origin v0.1.0
+```

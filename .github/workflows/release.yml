@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rid: [linux-x64, linux-arm64, macos-x64, macos-arm64, win-x64]
+        rid: [linux-x64, linux-arm64, osx-x64, osx-arm64, win-x64]
     steps:
       - uses: actions/checkout@v4
 
@@ -33,6 +33,10 @@ jobs:
       - name: Package
         run: |
           RID="${{ matrix.rid }}"
+          ASSET_OS="${RID%%-*}"
+          if [[ "$ASSET_OS" == "osx" ]]; then
+            ASSET_OS="macos"
+          fi
           BIN_NAME=climate
           EXT=tar.gz
           if [[ "$RID" == win-* ]]; then
@@ -46,9 +50,9 @@ jobs:
           fi
 
           if [[ "$EXT" == "zip" ]]; then
-            (cd dist/$RID && zip -q "../climate-${RID%%-*}-${RID#*-}.zip" "$BIN_NAME")
+            (cd dist/$RID && zip -q "../climate-${ASSET_OS}-${RID#*-}.zip" "$BIN_NAME")
           else
-            (cd dist/$RID && tar -czf "../climate-${RID%%-*}-${RID#*-}.tar.gz" "$BIN_NAME")
+            (cd dist/$RID && tar -czf "../climate-${ASSET_OS}-${RID#*-}.tar.gz" "$BIN_NAME")
           fi
 
       - name: Upload assets

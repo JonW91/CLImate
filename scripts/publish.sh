@@ -4,7 +4,7 @@ set -euf
 PROJECT="${1:-CLImate.App}"
 DIST_DIR="${DIST_DIR:-dist}"
 
-RUNTIMES="linux-x64 linux-arm64 macos-x64 macos-arm64 win-x64"
+RUNTIMES="linux-x64 linux-arm64 osx-x64 osx-arm64 win-x64"
 
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
@@ -24,15 +24,20 @@ for RID in $RUNTIMES; do
     EXT="zip"
   fi
 
+  ASSET_OS="${RID%%-*}"
+  if [ "$ASSET_OS" = "osx" ]; then
+    ASSET_OS="macos"
+  fi
+
   if [ ! -f "$OUT_DIR/$BIN_NAME" ]; then
     echo "Missing binary for $RID" >&2
     exit 1
   fi
 
   if [ "$EXT" = "zip" ]; then
-    (cd "$OUT_DIR" && zip -q "../climate-${RID%%-*}-${RID#*-}.zip" "$BIN_NAME")
+    (cd "$OUT_DIR" && zip -q "../climate-${ASSET_OS}-${RID#*-}.zip" "$BIN_NAME")
   else
-    (cd "$OUT_DIR" && tar -czf "../climate-${RID%%-*}-${RID#*-}.tar.gz" "$BIN_NAME")
+    (cd "$OUT_DIR" && tar -czf "../climate-${ASSET_OS}-${RID#*-}.tar.gz" "$BIN_NAME")
   fi
 
 done

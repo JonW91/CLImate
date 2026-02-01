@@ -5,6 +5,7 @@
 - Keep DTOs isolated from rendering and CLI logic.
 - Provide readable output with optional ANSI coloring.
 - Improve ASCII art legibility with weather-appropriate color cues.
+- Maintain test coverage for core functionality.
 
 ## Completed
 - Composition root for DI registration.
@@ -13,19 +14,18 @@
 - Domain forecast models added.
 - ANSI color support with `--no-color` and `--color` flags.
 - Per-character colorization for weather art (clouds/rain/snow/lightning).
-- Optional warnings integration with per-day warning lines.
+- Weather warnings integration with per-day warning lines.
 - Weather warnings service (MeteoBlue integration) implemented.
 - Forecast model extended to include warnings by date.
 - CLI updated to fetch and display warnings.
-
-## In Progress (Uncommitted Changes)
-- Weather warnings feature fully integrated (needs commit).
-- Placeholder "Weather warnings: Not available yet" message still showing (should be removed).
+- xUnit test project with FakeItEasy.
+- Tests for WeatherWarningsService (7 tests).
+- Tests for domain models: Forecast, DailyForecast, ForecastUnits, WeatherWarning (11 tests).
 
 ## Next Steps
-- [ ] Clean up and commit weather warnings feature.
-- [ ] Remove placeholder "not available yet" message from CLI output.
-- [ ] Add unit tests for `ApiMapper`, `TemperatureColorScale`, and CLI parsing.
-- [ ] Add unit tests for `WeatherWarningsService` and `MeteoBlueWarningsClient`.
+- [ ] Add tests for MeteoBlueWarningsClient.
+- [ ] Add tests for ApiMapper and TemperatureColorScale.
+- [ ] Add tests for CLI argument parsing.
 - [ ] Make temperature thresholds configurable (config file or CLI flags).
 - [ ] Add a diagnostics mode for capturing raw API responses when needed.
+

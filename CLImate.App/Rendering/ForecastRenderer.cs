@@ -47,7 +47,8 @@ public sealed class ForecastRenderer : IForecastRenderer
             var descriptor = _weatherCodes.Describe(day.WeatherCode);
             var art = BuildArt(descriptor.ArtKey, descriptor.ArtColor, showArt, colorEnabled);
 
-            _console.WriteLine($"{day.Date}  {descriptor.Description}");
+            var dateWithDay = FormatDateWithDayOfWeek(day.Date);
+            _console.WriteLine($"{dateWithDay}  {descriptor.Description}");
             if (!string.IsNullOrWhiteSpace(art))
             {
                 _console.WriteLine(art);
@@ -98,6 +99,15 @@ public sealed class ForecastRenderer : IForecastRenderer
     private static string FormatValue(double value)
     {
         return double.IsNaN(value) ? "n/a" : value.ToString("0.#");
+    }
+
+    private static string FormatDateWithDayOfWeek(string date)
+    {
+        if (DateTime.TryParse(date, out var dt))
+        {
+            return $"{date} ({dt.DayOfWeek})";
+        }
+        return date;
     }
 
     private static int? GetTerminalWidth()

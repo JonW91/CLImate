@@ -10,10 +10,11 @@ public interface IArtColorizer
 public sealed class ArtColorizer : IArtColorizer
 {
     private static readonly HashSet<char> CloudChars = new(new[] { '.', '-', '(', ')', '_' });
-    private static readonly HashSet<char> SunChars = new(new[] { 'o', '\\', '/', '|' });
-    private static readonly HashSet<char> RainChars = new(new[] { '\'' });
+    private static readonly HashSet<char> SunChars = new(new[] { 'o', '\\', '/', '|', '*' });
+    private static readonly HashSet<char> RainChars = new(new[] { '/' });
     private static readonly HashSet<char> SnowChars = new(new[] { '*' });
-    private static readonly HashSet<char> LightningChars = new(new[] { '/', '\\' });
+    private static readonly HashSet<char> LightningChars = new(new[] { '/', '_' });
+    private static readonly HashSet<char> DotChars = new(new[] { '.' });
 
     private readonly IAnsiColorizer _colorizer;
 
@@ -74,11 +75,13 @@ public sealed class ArtColorizer : IArtColorizer
             return AnsiColor.Default;
         }
 
+        // Clear sky - everything is sun/yellow
         if (string.Equals(key, "clear", StringComparison.OrdinalIgnoreCase))
         {
             return AnsiColor.Yellow;
         }
 
+        // Partly cloudy - sun chars are yellow, cloud chars are gray
         if (string.Equals(key, "partly_cloudy", StringComparison.OrdinalIgnoreCase))
         {
             if (SunChars.Contains(ch))
@@ -94,6 +97,7 @@ public sealed class ArtColorizer : IArtColorizer
             return AnsiColor.Default;
         }
 
+        // Thunderstorm - lightning is yellow, clouds are dark gray, hail is white
         if (key.Contains("thunderstorm", StringComparison.OrdinalIgnoreCase))
         {
             if (LightningChars.Contains(ch))
@@ -114,9 +118,10 @@ public sealed class ArtColorizer : IArtColorizer
             return AnsiColor.Default;
         }
 
+        // Snow - asterisks are white, clouds are gray, dots are white
         if (key.Contains("snow", StringComparison.OrdinalIgnoreCase))
         {
-            if (SnowChars.Contains(ch))
+            if (SnowChars.Contains(ch) || DotChars.Contains(ch))
             {
                 return AnsiColor.White;
             }
@@ -129,6 +134,7 @@ public sealed class ArtColorizer : IArtColorizer
             return AnsiColor.Default;
         }
 
+        // Rain/drizzle - slashes are blue, asterisks (freezing) are white, clouds are gray
         if (key.Contains("rain", StringComparison.OrdinalIgnoreCase)
             || key.Contains("drizzle", StringComparison.OrdinalIgnoreCase))
         {
@@ -150,12 +156,14 @@ public sealed class ArtColorizer : IArtColorizer
             return AnsiColor.Default;
         }
 
+        // Fog and overcast - all gray
         if (key.Contains("fog", StringComparison.OrdinalIgnoreCase)
             || key.Contains("overcast", StringComparison.OrdinalIgnoreCase))
         {
             return AnsiColor.Gray;
         }
 
+        // Default: cloud chars are gray
         if (CloudChars.Contains(ch))
         {
             return AnsiColor.Gray;

@@ -2,7 +2,8 @@
 
 ## Weather Art
 - Refined ASCII art with more vertical detail for rain/snow/thunder.
-- Added angled rain (`/ / /`) and a centered, compact lightning bolt.
+- Updated thunderstorm lightning to stacked `/ \ /` bolts and tightened spacing.
+- Adjusted thunderstorm cloud alignment across sizes; centered lightning under the cloud.
 - Thunderstorm clouds now render darker, with lightning in yellow.
 
 ## Warnings

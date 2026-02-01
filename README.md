@@ -6,6 +6,7 @@ CLImate is a terminal weather app. Type a location, and it prints a 7-day foreca
 
 - Location lookup by name (international)
 - 7-day forecast with highs/lows, wind, and precipitation
+- Today-only view with morning/afternoon/evening splits when available
 - ASCII art for conditions (no special terminal requirements)
 - Metric or imperial units
 
@@ -15,6 +16,7 @@ CLImate is a terminal weather app. Type a location, and it prints a 7-day foreca
 dotnet run --project CLImate.App -- "London, UK"
 dotnet run --project CLImate.App -- --units imperial "New York, NY"
 dotnet run --project CLImate.App -- --country GB "Edinburgh, Scotland"
+dotnet run --project CLImate.App -- --today "Seattle, WA"
 ```
 
 If multiple locations match, CLImate will prompt you to pick one. You can also pass a 2-letter country code to narrow results.
@@ -37,7 +39,7 @@ Geocoding:
 
 Forecast:
 - Endpoint: https://api.open-meteo.com/v1/forecast
-- Parameters: `latitude`, `longitude`, `daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max`, `timezone=auto`, plus unit parameters when needed.
+- Parameters: `latitude`, `longitude`, `daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max`, `hourly=weather_code,temperature_2m,precipitation,wind_speed_10m,wind_gusts_10m`, `timezone=auto`, plus unit parameters when needed.
 - Docs: https://open-meteo.com/en/docs
 
 ## Notes

@@ -9,6 +9,12 @@ public sealed class ForecastResponse
 
     [JsonPropertyName("daily_units")]
     public DailyUnits? DailyUnits { get; set; }
+
+    [JsonPropertyName("hourly")]
+    public Hourly? Hourly { get; set; }
+
+    [JsonPropertyName("hourly_units")]
+    public HourlyUnits? HourlyUnits { get; set; }
 }
 
 public sealed class Daily
@@ -51,4 +57,40 @@ public sealed class DailyUnits
 
     [JsonPropertyName("wind_gusts_10m_max")]
     public string WindGustsMax { get; set; } = "m/s";
+}
+
+public sealed class Hourly
+{
+    [JsonPropertyName("time")]
+    public List<string> Time { get; set; } = new();
+
+    [JsonPropertyName("weather_code")]
+    public List<int> WeatherCode { get; set; } = new();
+
+    [JsonPropertyName("temperature_2m")]
+    public List<double> Temperature { get; set; } = new();
+
+    [JsonPropertyName("precipitation")]
+    public List<double> Precipitation { get; set; } = new();
+
+    [JsonPropertyName("wind_speed_10m")]
+    public List<double> WindSpeed { get; set; } = new();
+
+    [JsonPropertyName("wind_gusts_10m")]
+    public List<double> WindGusts { get; set; } = new();
+}
+
+public sealed class HourlyUnits
+{
+    [JsonPropertyName("temperature_2m")]
+    public string Temperature { get; set; } = "°C";
+
+    [JsonPropertyName("precipitation")]
+    public string Precipitation { get; set; } = "mm";
+
+    [JsonPropertyName("wind_speed_10m")]
+    public string WindSpeed { get; set; } = "m/s";
+
+    [JsonPropertyName("wind_gusts_10m")]
+    public string WindGusts { get; set; } = "m/s";
 }

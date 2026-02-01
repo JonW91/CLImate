@@ -7,6 +7,9 @@
 - Replaced sun art with a new centered glyph and shifted the horizontal beam for alignment.
 - Thunderstorm clouds now render darker, with lightning in yellow.
 
+## CLI
+- Added a `--today` flag to show only today, split into morning/afternoon/evening when hourly data is available.
+
 ## Warnings
 - Added per-day warning lines in the forecast output.
 - Added optional MeteoBlue warnings integration (requires `METEOBLUE_API_KEY`).

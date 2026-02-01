@@ -10,4 +10,5 @@ public sealed class CliOptions
     public bool UseColor { get; set; } = true;
     public string? LocationInput { get; set; }
     public bool ShowHelp { get; set; }
+    public bool TodayOnly { get; set; }
 }

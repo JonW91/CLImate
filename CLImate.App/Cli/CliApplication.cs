@@ -128,7 +128,15 @@ public sealed class CliApplication : ICliApplication
             warningDates,
             cancellationToken);
 
-        _forecastRenderer.RenderDaily(forecast.WithWarnings(warnings), options.ShowArt, options.UseColor);
+        var forecastWithWarnings = forecast.WithWarnings(warnings);
+        if (options.TodayOnly)
+        {
+            _forecastRenderer.RenderToday(forecastWithWarnings, options.ShowArt, options.UseColor);
+        }
+        else
+        {
+            _forecastRenderer.RenderDaily(forecastWithWarnings, options.ShowArt, options.UseColor);
+        }
 
         return 0;
     }

@@ -71,6 +71,12 @@ public sealed class CliOptionsParser : ICliOptionsParser
                 continue;
             }
 
+            if (arg is "--today" or "-t")
+            {
+                options.TodayOnly = true;
+                continue;
+            }
+
             if (arg.StartsWith("--units=", StringComparison.OrdinalIgnoreCase))
             {
                 options.Units = ParseUnits(arg.Substring("--units=".Length));

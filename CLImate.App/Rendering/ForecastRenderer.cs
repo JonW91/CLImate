@@ -6,6 +6,7 @@ namespace CLImate.App.Rendering;
 public interface IForecastRenderer
 {
     void RenderDaily(Forecast forecast, bool showArt, bool useColor);
+    void RenderToday(Forecast forecast, bool showArt, bool useColor);
 }
 
 public sealed class ForecastRenderer : IForecastRenderer
@@ -63,6 +64,48 @@ public sealed class ForecastRenderer : IForecastRenderer
         }
     }
 
+    public void RenderToday(Forecast forecast, bool showArt, bool useColor)
+    {
+        var units = forecast.Units;
+        var colorEnabled = _colorizer.ShouldUseColor(useColor);
+        var today = forecast.Today;
+
+        _console.WriteLine();
+
+        if (today == null || today.Segments.Count == 0)
+        {
+            RenderSingleDay(forecast, showArt, colorEnabled);
+            return;
+        }
+
+        var dateWithDay = FormatDateWithDayOfWeek(today.Date);
+        _console.WriteLine($"Today ({dateWithDay})");
+
+        var warning = GetWarning(forecast, today.Date);
+        if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
+        {
+            _console.WriteLine($"Warning: {warning}");
+        }
+
+        foreach (var segment in today.Segments)
+        {
+            var descriptor = _weatherCodes.Describe(segment.WeatherCode);
+            var art = BuildArt(descriptor.ArtKey, descriptor.ArtColor, showArt, colorEnabled);
+
+            _console.WriteLine();
+            _console.WriteLine($"{segment.Label}: {descriptor.Description}");
+            if (!string.IsNullOrWhiteSpace(art))
+            {
+                _console.WriteLine(art);
+            }
+
+            var temp = ColorizeValue(segment.TemperatureAverage, units.Temperature, colorEnabled);
+            _console.WriteLine($"  Temp:    {temp}");
+            _console.WriteLine($"  Precip:  {FormatValue(segment.PrecipitationSum)}{units.Precipitation}");
+            _console.WriteLine($"  Wind:    {FormatValue(segment.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(segment.WindGustsMax)}{units.WindGusts})");
+        }
+    }
+
     private string BuildArt(string key, AnsiColor artColor, bool showArt, bool colorEnabled)
     {
         if (!showArt)
@@ -99,6 +142,34 @@ public sealed class ForecastRenderer : IForecastRenderer
     private static string FormatValue(double value)
     {
         return double.IsNaN(value) ? "n/a" : value.ToString("0.#");
+    }
+
+    private void RenderSingleDay(Forecast forecast, bool showArt, bool colorEnabled)
+    {
+        if (forecast.Days.Count == 0)
+        {
+            _console.WriteLine("No daily data available.");
+            return;
+        }
+
+        var units = forecast.Units;
+        var day = forecast.Days[0];
+        var descriptor = _weatherCodes.Describe(day.WeatherCode);
+        var art = BuildArt(descriptor.ArtKey, descriptor.ArtColor, showArt, colorEnabled);
+        var dateWithDay = FormatDateWithDayOfWeek(day.Date);
+
+        _console.WriteLine($"Today ({dateWithDay})  {descriptor.Description}");
+        if (!string.IsNullOrWhiteSpace(art))
+        {
+            _console.WriteLine(art);
+        }
+
+        var high = ColorizeValue(day.TemperatureMax, units.Temperature, colorEnabled);
+        var low = ColorizeValue(day.TemperatureMin, units.Temperature, colorEnabled);
+        _console.WriteLine($"  Temp:    {low} → {high}");
+        _console.WriteLine($"  Precip:  {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
+        _console.WriteLine($"  Wind:    {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
+        _console.WriteLine($"  Warning: {GetWarning(forecast, day.Date)}");
     }
 
     private static string FormatDateWithDayOfWeek(string date)

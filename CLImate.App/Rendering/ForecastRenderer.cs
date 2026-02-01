@@ -15,19 +15,22 @@ public sealed class ForecastRenderer : IForecastRenderer
     private readonly IWeatherCodeCatalog _weatherCodes;
     private readonly IAnsiColorizer _colorizer;
     private readonly ITemperatureColorScale _temperatureColors;
+    private readonly IArtColorizer _artColorizer;
 
     public ForecastRenderer(
         IConsoleIO console,
         IAsciiArtCatalog asciiArt,
         IWeatherCodeCatalog weatherCodes,
         IAnsiColorizer colorizer,
-        ITemperatureColorScale temperatureColors)
+        ITemperatureColorScale temperatureColors,
+        IArtColorizer artColorizer)
     {
         _console = console;
         _asciiArt = asciiArt;
         _weatherCodes = weatherCodes;
         _colorizer = colorizer;
         _temperatureColors = temperatureColors;
+        _artColorizer = artColorizer;
     }
 
     public void RenderDaily(Forecast forecast, bool showArt, bool useColor)
@@ -54,6 +57,7 @@ public sealed class ForecastRenderer : IForecastRenderer
             _console.WriteLine($"  High/Low: {high} / {low}");
             _console.WriteLine($"  Precip:   {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
             _console.WriteLine($"  Wind:     {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
+            _console.WriteLine($"  Warning:  {GetWarning(forecast, day.Date)}");
             _console.WriteLine();
         }
     }
@@ -71,7 +75,7 @@ public sealed class ForecastRenderer : IForecastRenderer
             return _colorizer.Apply($"[ {key.Replace('_', ' ').ToUpperInvariant()} ]", artColor, colorEnabled);
         }
 
-        return _colorizer.Apply(art, artColor, colorEnabled);
+        return _artColorizer.Colorize(art, key, colorEnabled);
     }
 
     private string ColorizeValue(double value, string unit, bool colorEnabled)
@@ -79,6 +83,16 @@ public sealed class ForecastRenderer : IForecastRenderer
         var color = _temperatureColors.GetColor(value);
         var formatted = $"{FormatValue(value)}{unit}";
         return _colorizer.Apply(formatted, color, colorEnabled);
+    }
+
+    private static string GetWarning(Forecast forecast, string date)
+    {
+        if (forecast.WarningsByDate.TryGetValue(date, out var warning))
+        {
+            return warning;
+        }
+
+        return "none";
     }
 
     private static string FormatValue(double value)

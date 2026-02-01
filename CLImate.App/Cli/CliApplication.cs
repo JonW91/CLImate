@@ -20,6 +20,7 @@ public sealed class CliApplication : ICliApplication
     private readonly ILocationFormatter _locationFormatter;
     private readonly ILocationInputParser _locationInputParser;
     private readonly IForecastRenderer _forecastRenderer;
+    private readonly IWeatherWarningsService _warningsService;
 
     public CliApplication(
         IConsoleIO console,
@@ -30,7 +31,8 @@ public sealed class CliApplication : ICliApplication
         ILocationSelector locationSelector,
         ILocationFormatter locationFormatter,
         ILocationInputParser locationInputParser,
-        IForecastRenderer forecastRenderer)
+        IForecastRenderer forecastRenderer,
+        IWeatherWarningsService warningsService)
     {
         _console = console;
         _optionsParser = optionsParser;
@@ -41,6 +43,7 @@ public sealed class CliApplication : ICliApplication
         _locationFormatter = locationFormatter;
         _locationInputParser = locationInputParser;
         _forecastRenderer = forecastRenderer;
+        _warningsService = warningsService;
     }
 
     public async Task<int> RunAsync(string[] args, CancellationToken cancellationToken = default)
@@ -118,10 +121,15 @@ public sealed class CliApplication : ICliApplication
             return 1;
         }
 
-        _forecastRenderer.RenderDaily(forecast, options.ShowArt, options.UseColor);
+        var warningDates = forecast.Days.Select(day => day.Date).ToList();
+        var warnings = await _warningsService.GetDailyWarningsAsync(
+            selected.Latitude.Value,
+            selected.Longitude.Value,
+            warningDates,
+            cancellationToken);
 
-        _console.WriteLine();
-        _console.WriteLine("Weather warnings: Not available yet (planned).");
+        _forecastRenderer.RenderDaily(forecast.WithWarnings(warnings), options.ShowArt, options.UseColor);
+
         return 0;
     }
 

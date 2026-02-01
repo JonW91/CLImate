@@ -2,14 +2,19 @@ namespace CLImate.App.Models;
 
 public sealed class Forecast
 {
-    public Forecast(IReadOnlyList<DailyForecast> days, ForecastUnits units)
+    public Forecast(IReadOnlyList<DailyForecast> days, ForecastUnits units, IReadOnlyDictionary<string, string>? warningsByDate = null)
     {
         Days = days;
         Units = units;
+        WarningsByDate = warningsByDate ?? new Dictionary<string, string>();
     }
 
     public IReadOnlyList<DailyForecast> Days { get; }
     public ForecastUnits Units { get; }
+    public IReadOnlyDictionary<string, string> WarningsByDate { get; }
+
+    public Forecast WithWarnings(IReadOnlyDictionary<string, string> warningsByDate)
+        => new Forecast(Days, Units, warningsByDate);
 }
 
 public sealed class DailyForecast

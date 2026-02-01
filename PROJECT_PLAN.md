@@ -14,8 +14,18 @@
 - ANSI color support with `--no-color` and `--color` flags.
 - Per-character colorization for weather art (clouds/rain/snow/lightning).
 - Optional warnings integration with per-day warning lines.
+- Weather warnings service (MeteoBlue integration) implemented.
+- Forecast model extended to include warnings by date.
+- CLI updated to fetch and display warnings.
+
+## In Progress (Uncommitted Changes)
+- Weather warnings feature fully integrated (needs commit).
+- Placeholder "Weather warnings: Not available yet" message still showing (should be removed).
 
 ## Next Steps
-- Add unit tests for `ApiMapper`, `TemperatureColorScale`, and CLI parsing.
-- Make temperature thresholds configurable (config file or CLI flags).
-- Add a diagnostics mode for capturing raw API responses when needed.
+- [ ] Clean up and commit weather warnings feature.
+- [ ] Remove placeholder "not available yet" message from CLI output.
+- [ ] Add unit tests for `ApiMapper`, `TemperatureColorScale`, and CLI parsing.
+- [ ] Add unit tests for `WeatherWarningsService` and `MeteoBlueWarningsClient`.
+- [ ] Make temperature thresholds configurable (config file or CLI flags).
+- [ ] Add a diagnostics mode for capturing raw API responses when needed.

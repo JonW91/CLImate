@@ -39,10 +39,11 @@ public sealed class AnsiColorizer : IAnsiColorizer
     {
         return color switch
         {
+            AnsiColor.DarkGray => "\u001b[90m",
             AnsiColor.Red => "\u001b[31m",
             AnsiColor.Yellow => "\u001b[33m",
             AnsiColor.Blue => "\u001b[34m",
-            AnsiColor.Gray => "\u001b[90m",
+            AnsiColor.Gray => "\u001b[37m",
             AnsiColor.White => "\u001b[97m",
             _ => string.Empty
         };

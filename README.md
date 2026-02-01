@@ -42,7 +42,19 @@ Forecast:
 
 ## Notes
 
-- Weather warnings are not implemented yet (planned for a future release).
+Weather warnings are displayed when the `METEOBLUE_API_KEY` environment variable is set with a valid MeteoBlue API key. Without an API key, all days will show "Warning: none".
+
+## Development
+
+Run tests:
+```bash
+dotnet test CLImate.Tests/CLImate.Tests.csproj
+```
+
+Build the solution:
+```bash
+dotnet build
+```
 
 ## Install (no runtime required)
 

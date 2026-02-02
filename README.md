@@ -4,6 +4,7 @@ A cross-platform command-line weather forecast application built with .NET 10. G
 
 ![.NET 10](https://img.shields.io/badge/.NET-10.0-purple)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+![Beta](https://img.shields.io/badge/status-beta-orange)
 
 ## Features
 
@@ -38,9 +39,11 @@ climate --country US Portland
 
 ## Installation
 
-### Option 1: Download Self-Contained Binary (Recommended)
+> **Note:** CLImate is currently in **beta** (v0.1.0-beta). Package manager support is coming soon.
 
-Download the latest release for your platform - **no .NET runtime required**:
+### Option 1: One-Line Install Scripts (Recommended)
+
+Download and install the self-contained binary - **no .NET runtime required**:
 
 **Linux/macOS:**
 ```bash
@@ -52,17 +55,85 @@ curl -fsSL https://raw.githubusercontent.com/JonW91/CLImate/main/scripts/install
 irm https://raw.githubusercontent.com/JonW91/CLImate/main/scripts/install.ps1 | iex
 ```
 
-Or download directly from the [Releases](https://github.com/JonW91/CLImate/releases) page.
+### Option 2: Download Binary Manually
 
-### Option 2: .NET Global Tool
+Download from the [Releases](https://github.com/JonW91/CLImate/releases) page:
+
+| Platform | Download |
+|----------|----------|
+| **Linux x64** | `climate-linux-x64.tar.gz` |
+| **Linux ARM64** | `climate-linux-arm64.tar.gz` |
+| **macOS Intel** | `climate-macos-x64.tar.gz` |
+| **macOS Apple Silicon** | `climate-macos-arm64.tar.gz` |
+| **Windows x64** | `climate-windows-x64.zip` |
+
+Extract and add to your PATH:
+```bash
+# Linux/macOS
+tar -xzf climate-*.tar.gz
+sudo mv climate /usr/local/bin/
+
+# Windows (PowerShell)
+Expand-Archive climate-windows-x64.zip -DestinationPath $env:LOCALAPPDATA\CLImate
+# Add to PATH via System Settings or:
+$env:PATH += ";$env:LOCALAPPDATA\CLImate"
+```
+
+### Option 3: Package Managers (Coming Soon)
+
+We're working on getting CLImate into popular package managers:
+
+<details>
+<summary><strong>🍺 Homebrew (macOS/Linux)</strong> - Planned</summary>
+
+```bash
+# Coming soon!
+brew install jonw91/tap/climate
+```
+</details>
+
+<details>
+<summary><strong>🪟 Scoop (Windows)</strong> - Planned</summary>
+
+```powershell
+# Coming soon!
+scoop bucket add climate https://github.com/JonW91/scoop-climate
+scoop install climate
+```
+</details>
+
+<details>
+<summary><strong>🍫 Chocolatey (Windows)</strong> - Planned</summary>
+
+```powershell
+# Coming soon!
+choco install climate
+```
+</details>
+
+<details>
+<summary><strong>📦 WinGet (Windows)</strong> - Planned</summary>
+
+```powershell
+# Coming soon!
+winget install JonW91.CLImate
+```
+</details>
+
+### Option 4: .NET Global Tool
 
 If you have the [.NET 10 SDK](https://dotnet.microsoft.com/download) installed:
 
 ```bash
-dotnet tool install --global CLImate
+dotnet tool install --global CLImate --prerelease
 ```
 
-### Option 3: Build from Source
+Then run with:
+```bash
+climate London
+```
+
+### Option 5: Build from Source
 
 Requires [.NET 10 SDK](https://dotnet.microsoft.com/download).
 

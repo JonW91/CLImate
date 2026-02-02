@@ -195,10 +195,11 @@ git push origin v0.1.0
 See [ROADMAP.md](ROADMAP.md) for the full development plan, including:
 
 - ✅ Self-contained binaries (no runtime required)
+- ✅ .NET global tool (`dotnet tool install -g CLImate`)
+- ✅ Adaptive terminal layout (auto horizontal/vertical)
+- ✅ Hourly forecast mode (`--hourly`)
 - 🔲 Package manager distribution (Homebrew, Chocolatey, Scoop)
-- 🔲 .NET global tool (`dotnet tool install -g CLImate`)
 - 🔲 Configuration file for user preferences
-- 🔲 Output format options (JSON, CSV)
 - 🔲 Caching for reduced API calls
 
 ## License

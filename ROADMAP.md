@@ -8,9 +8,9 @@ This document outlines the development plan for making CLImate a production-read
 
 ### ✅ What Works Well
 - Clean architecture with dependency injection
-- Cross-platform .NET 10 codebase
+- Cross-platform .NET 10 codebase (Linux, macOS, Windows)
 - ASCII art weather visualisation with ANSI colours
-- 7-day and today-only forecast modes
+- 7-day, today-only, and hourly forecast modes
 - Location search with country code filtering
 - Metric/Imperial unit support
 - Weather warnings integration (MeteoBlue)
@@ -19,7 +19,7 @@ This document outlines the development plan for making CLImate a production-read
 - Adaptive terminal layout (horizontal/vertical) ✅
 - Graceful degradation for missing services ✅
 - CI/CD pipeline with GitHub Actions ✅
-- Comprehensive test coverage ✅
+- Comprehensive test coverage (121 tests) ✅
 
 ### ⚠️ Remaining Areas for Improvement
 

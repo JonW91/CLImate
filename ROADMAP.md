@@ -61,10 +61,10 @@ catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
 }
 ```
 
-### 1.3 Input Validation
+### 1.3 Input Validation ✅
 - [x] Sanitise location input (prevent injection in URLs) - Uses Uri.EscapeDataString in GeocodingService
-- [ ] Validate country codes against catalogue
-- [ ] Handle special characters in location names
+- [x] Validate country codes against ISO 3166-1 catalogue - Added IsValidCode() with full country list
+- [x] Handle special characters in location names - Uri.EscapeDataString handles encoding
 
 ### 1.4 Graceful Degradation
 - [ ] Work without MeteoBlue API key (warnings show "unavailable")

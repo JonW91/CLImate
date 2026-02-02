@@ -11,10 +11,12 @@ public interface ICliOptionsParser
 public sealed class CliOptionsParser : ICliOptionsParser
 {
     private readonly ILocationInputParser _locationInputParser;
+    private readonly ICountryCodeCatalogue _countryCodeCatalogue;
 
-    public CliOptionsParser(ILocationInputParser locationInputParser)
+    public CliOptionsParser(ILocationInputParser locationInputParser, ICountryCodeCatalogue countryCodeCatalogue)
     {
         _locationInputParser = locationInputParser;
+        _countryCodeCatalogue = countryCodeCatalogue;
     }
 
     public CliOptionsParseResult Parse(string[] args)
@@ -49,9 +51,15 @@ public sealed class CliOptionsParser : ICliOptionsParser
                     return CliOptionsParseResult.Failure("Missing value for --country.");
                 }
 
-                options.CountryCode = _locationInputParser.NormaliseCountryCode(args[++i]);
-                    continue;
+                var countryValue = args[++i];
+                var normalised = _locationInputParser.NormaliseCountryCode(countryValue);
+                if (!_countryCodeCatalogue.IsValidCode(normalised ?? countryValue))
+                {
+                    return CliOptionsParseResult.Failure($"Invalid country code: '{countryValue}'. Use a 2-letter ISO 3166-1 code (e.g., GB, US, DE).");
                 }
+                options.CountryCode = normalised ?? countryValue.ToUpperInvariant();
+                continue;
+            }
 
                 if (arg is "--no-art")
                 {
@@ -97,7 +105,13 @@ public sealed class CliOptionsParser : ICliOptionsParser
 
             if (arg.StartsWith("--country=", StringComparison.OrdinalIgnoreCase))
             {
-                options.CountryCode = _locationInputParser.NormaliseCountryCode(arg.Substring("--country=".Length));
+                var countryValue = arg.Substring("--country=".Length);
+                var normalised = _locationInputParser.NormaliseCountryCode(countryValue);
+                if (!_countryCodeCatalogue.IsValidCode(normalised ?? countryValue))
+                {
+                    return CliOptionsParseResult.Failure($"Invalid country code: '{countryValue}'. Use a 2-letter ISO 3166-1 code (e.g., GB, US, DE).");
+                }
+                options.CountryCode = normalised ?? countryValue.ToUpperInvariant();
                 continue;
             }
 

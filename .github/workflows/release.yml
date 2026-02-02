@@ -50,9 +50,9 @@ jobs:
           fi
 
           if [[ "$EXT" == "zip" ]]; then
-            (cd dist/$RID && zip -q "../climate-${ASSET_OS}-${RID#*-}.zip" "$BIN_NAME")
+            (cd dist/$RID && zip -qr "../climate-${ASSET_OS}-${RID#*-}.zip" "$BIN_NAME" Assets/)
           else
-            (cd dist/$RID && tar -czf "../climate-${ASSET_OS}-${RID#*-}.tar.gz" "$BIN_NAME")
+            (cd dist/$RID && tar -czf "../climate-${ASSET_OS}-${RID#*-}.tar.gz" "$BIN_NAME" Assets/)
           fi
 
       - name: Upload assets

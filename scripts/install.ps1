@@ -53,6 +53,13 @@ try {
   $dest = Join-Path $installDir $binName
   Copy-Item $src $dest -Force
 
+  # Copy Assets folder if present
+  $assetsSrc = Join-Path $tempDir.FullName "Assets"
+  if (Test-Path $assetsSrc) {
+    $assetsDest = Join-Path $installDir "Assets"
+    Copy-Item $assetsSrc $assetsDest -Recurse -Force
+  }
+
   Write-Host "Installed CLImate to $dest"
   if ($IsWindows) {
     Write-Host "Add '$installDir' to PATH to run 'climate' from anywhere."

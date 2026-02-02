@@ -75,7 +75,10 @@ else
   INSTALL_DIR="${HOME}/.local/bin"
 fi
 
+CLIMATE_DATA_DIR="${HOME}/.local/share/climate"
+
 mkdir -p "$INSTALL_DIR"
+mkdir -p "$CLIMATE_DATA_DIR"
 
 if [ ! -f "$TMP_DIR/$BIN_NAME" ]; then
   echo "Expected binary '$BIN_NAME' not found in archive." >&2
@@ -83,6 +86,11 @@ if [ ! -f "$TMP_DIR/$BIN_NAME" ]; then
 fi
 
 install -m 0755 "$TMP_DIR/$BIN_NAME" "$INSTALL_DIR/$BIN_NAME"
+
+# Copy Assets folder if present
+if [ -d "$TMP_DIR/Assets" ]; then
+  cp -r "$TMP_DIR/Assets" "$INSTALL_DIR/"
+fi
 
 echo "Installed CLImate to $INSTALL_DIR/$BIN_NAME"
 if ! echo "$PATH" | tr ':' '\n' | grep -qx "$INSTALL_DIR"; then

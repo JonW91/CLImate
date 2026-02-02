@@ -58,33 +58,38 @@ jobs:
       - name: Build DEB package (Linux x64 only)
         if: matrix.rid == 'linux-x64'
         run: |
+          set -f  # Disable globbing
           VERSION="${GITHUB_REF_NAME#v}"
-          PKG_VERSION="${VERSION//-/~}"
+          # For Debian, replace hyphen with tilde for pre-release versions
+          # Store in variable without tilde expansion
+          PKG_VERSION=$(echo "$VERSION" | sed 's/-beta/~beta/')
           PKG_DIR="climate_${PKG_VERSION}_amd64"
+          # Escape tilde in directory name to prevent expansion
+          PKG_DIR=$(printf '%s' "$PKG_DIR")
 
-          mkdir -p "${PKG_DIR}/DEBIAN"
-          mkdir -p "${PKG_DIR}/usr/bin"
-          mkdir -p "${PKG_DIR}/usr/share/climate/Assets"
+          mkdir -p "$PKG_DIR/DEBIAN"
+          mkdir -p "$PKG_DIR/usr/bin"
+          mkdir -p "$PKG_DIR/usr/share/climate/Assets"
 
-          cp dist/linux-x64/climate "${PKG_DIR}/usr/bin/climate"
-          chmod 755 "${PKG_DIR}/usr/bin/climate"
-          cp -r dist/linux-x64/Assets/* "${PKG_DIR}/usr/share/climate/Assets/" 2>/dev/null || true
+          cp dist/linux-x64/climate "$PKG_DIR/usr/bin/climate"
+          chmod 755 "$PKG_DIR/usr/bin/climate"
+          cp -r dist/linux-x64/Assets/* "$PKG_DIR/usr/share/climate/Assets/" 2>/dev/null || true
 
-          printf '%s\n' \
-            "Package: climate" \
-            "Version: ${PKG_VERSION}-1" \
-            "Section: utils" \
-            "Priority: optional" \
-            "Architecture: amd64" \
-            "Maintainer: JonW91 <jonw91@users.noreply.github.com>" \
-            "Homepage: https://github.com/JonW91/CLImate" \
-            "Description: Cross-platform CLI weather forecast with ASCII art" \
-            " CLImate is a command-line weather forecast application built with .NET 10." \
-            " Get beautiful ASCII art weather forecasts directly in your terminal." \
-            > "${PKG_DIR}/DEBIAN/control"
+          {
+            echo "Package: climate"
+            echo "Version: $PKG_VERSION-1"
+            echo "Section: utils"
+            echo "Priority: optional"
+            echo "Architecture: amd64"
+            echo "Maintainer: JonW91 <jonw91@users.noreply.github.com>"
+            echo "Homepage: https://github.com/JonW91/CLImate"
+            echo "Description: Cross-platform CLI weather forecast with ASCII art"
+            echo " CLImate is a command-line weather forecast application built with .NET 10."
+            echo " Get beautiful ASCII art weather forecasts directly in your terminal."
+          } > "$PKG_DIR/DEBIAN/control"
 
-          dpkg-deb --build "${PKG_DIR}"
-          mv "${PKG_DIR}.deb" dist/
+          dpkg-deb --build "$PKG_DIR"
+          mv "$PKG_DIR.deb" dist/
 
       - name: Upload assets
         uses: softprops/action-gh-release@v2

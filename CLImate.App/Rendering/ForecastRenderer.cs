@@ -64,26 +64,45 @@ public sealed class ForecastRenderer : IForecastRenderer
         var colourEnabled = _colouriser.ShouldUseColour(useColour);
 
         _console.WriteLine();
-        _console.WriteLine("Daily forecast (today + 6 days):");
+        _console.WriteLine("7-Day Forecast");
+        _console.WriteLine(new string('─', 40));
         _console.WriteLine();
 
         foreach (var day in forecast.Days)
         {
             var descriptor = _weatherCodes.Describe(day.WeatherCode);
             var art = BuildArt(descriptor.ArtKey, descriptor.ArtColour, showArt, colourEnabled);
+            var warning = GetWarning(forecast, day.Date);
 
-            var dateWithDay = FormatDateWithDayOfWeek(day.Date);
-            _console.WriteLine($"{dateWithDay}  {descriptor.Description}");
+            // Header with day name and date
+            var dayHeader = FormatDayHeader(day.Date);
+            _console.WriteLine($"┌─ {dayHeader} ─────────────────────────");
+            _console.WriteLine($"│  {descriptor.Description}");
+
+            // ASCII art (indented)
             if (!string.IsNullOrWhiteSpace(art))
             {
-                _console.WriteLine(art);
+                foreach (var line in art.Split('\n'))
+                {
+                    _console.WriteLine($"│  {line}");
+                }
             }
+
+            // Weather details
             var high = ColouriseValue(day.TemperatureMax, units.Temperature, colourEnabled);
             var low = ColouriseValue(day.TemperatureMin, units.Temperature, colourEnabled);
-            _console.WriteLine($"  High/Low: {high} / {low}");
-            _console.WriteLine($"  Precip:   {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
-            _console.WriteLine($"  Wind:     {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
-            _console.WriteLine($"  Warning:  {GetWarning(forecast, day.Date)}");
+            _console.WriteLine($"│");
+            _console.WriteLine($"│  🌡️  {low} → {high}");
+            _console.WriteLine($"│  💧 {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
+            _console.WriteLine($"│  💨 {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
+
+            // Warning (only if present)
+            if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
+            {
+                _console.WriteLine($"│  ⚠️  {warning}");
+            }
+
+            _console.WriteLine($"└──────────────────────────────────────");
             _console.WriteLine();
         }
     }
@@ -102,13 +121,13 @@ public sealed class ForecastRenderer : IForecastRenderer
             return;
         }
 
-        var dateWithDay = FormatDateWithDayOfWeek(today.Date);
-        _console.WriteLine($"Today ({dateWithDay})");
+        var dayHeader = FormatDayHeader(today.Date);
+        _console.WriteLine($"┌─ {dayHeader} ─────────────────────────");
 
         var warning = GetWarning(forecast, today.Date);
         if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
         {
-            _console.WriteLine($"Warning: {warning}");
+            _console.WriteLine($"│  ⚠️  {warning}");
         }
 
         foreach (var segment in today.Segments)
@@ -116,18 +135,25 @@ public sealed class ForecastRenderer : IForecastRenderer
             var descriptor = _weatherCodes.Describe(segment.WeatherCode);
             var art = BuildArt(descriptor.ArtKey, descriptor.ArtColour, showArt, colourEnabled);
 
-            _console.WriteLine();
-            _console.WriteLine($"{segment.Label}: {descriptor.Description}");
+            _console.WriteLine($"│");
+            _console.WriteLine($"├── {segment.Label.ToUpperInvariant()}");
+            _console.WriteLine($"│   {descriptor.Description}");
+
             if (!string.IsNullOrWhiteSpace(art))
             {
-                _console.WriteLine(art);
+                foreach (var line in art.Split('\n'))
+                {
+                    _console.WriteLine($"│   {line}");
+                }
             }
 
             var temp = ColouriseValue(segment.TemperatureAverage, units.Temperature, colourEnabled);
-            _console.WriteLine($"  Temp:    {temp}");
-            _console.WriteLine($"  Precip:  {FormatValue(segment.PrecipitationSum)}{units.Precipitation}");
-            _console.WriteLine($"  Wind:    {FormatValue(segment.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(segment.WindGustsMax)}{units.WindGusts})");
+            _console.WriteLine($"│   🌡️  {temp}");
+            _console.WriteLine($"│   💧 {FormatValue(segment.PrecipitationSum)}{units.Precipitation}");
+            _console.WriteLine($"│   💨 {FormatValue(segment.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(segment.WindGustsMax)}{units.WindGusts})");
         }
+
+        _console.WriteLine($"└──────────────────────────────────────");
     }
 
     private string BuildArt(string key, AnsiColour artColour, bool showArt, bool colourEnabled)
@@ -180,20 +206,33 @@ public sealed class ForecastRenderer : IForecastRenderer
         var day = forecast.Days[0];
         var descriptor = _weatherCodes.Describe(day.WeatherCode);
         var art = BuildArt(descriptor.ArtKey, descriptor.ArtColour, showArt, colourEnabled);
-        var dateWithDay = FormatDateWithDayOfWeek(day.Date);
+        var warning = GetWarning(forecast, day.Date);
+        var dayHeader = FormatDayHeader(day.Date);
 
-        _console.WriteLine($"Today ({dateWithDay})  {descriptor.Description}");
+        _console.WriteLine($"┌─ {dayHeader} ─────────────────────────");
+        _console.WriteLine($"│  {descriptor.Description}");
+
         if (!string.IsNullOrWhiteSpace(art))
         {
-            _console.WriteLine(art);
+            foreach (var line in art.Split('\n'))
+            {
+                _console.WriteLine($"│  {line}");
+            }
         }
 
         var high = ColouriseValue(day.TemperatureMax, units.Temperature, colourEnabled);
         var low = ColouriseValue(day.TemperatureMin, units.Temperature, colourEnabled);
-        _console.WriteLine($"  Temp:    {low} → {high}");
-        _console.WriteLine($"  Precip:  {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
-        _console.WriteLine($"  Wind:    {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
-        _console.WriteLine($"  Warning: {GetWarning(forecast, day.Date)}");
+        _console.WriteLine($"│");
+        _console.WriteLine($"│  🌡️  {low} → {high}");
+        _console.WriteLine($"│  💧 {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
+        _console.WriteLine($"│  💨 {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
+
+        if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
+        {
+            _console.WriteLine($"│  ⚠️  {warning}");
+        }
+
+        _console.WriteLine($"└──────────────────────────────────────");
     }
 
     private static string FormatDateWithDayOfWeek(string date)
@@ -201,6 +240,23 @@ public sealed class ForecastRenderer : IForecastRenderer
         if (DateTime.TryParse(date, out var dt))
         {
             return $"{date} ({dt.DayOfWeek})";
+        }
+        return date;
+    }
+
+    private static string FormatDayHeader(string date)
+    {
+        if (DateTime.TryParse(date, out var dt))
+        {
+            var isToday = dt.Date == DateTime.Today;
+            var isTomorrow = dt.Date == DateTime.Today.AddDays(1);
+
+            if (isToday)
+                return $"TODAY · {dt:ddd d MMM}";
+            if (isTomorrow)
+                return $"TOMORROW · {dt:ddd d MMM}";
+
+            return dt.ToString("dddd · d MMM").ToUpperInvariant();
         }
         return date;
     }

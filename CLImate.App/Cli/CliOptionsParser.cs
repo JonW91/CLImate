@@ -28,12 +28,18 @@ public sealed class CliOptionsParser : ICliOptionsParser
         {
             var arg = args[i];
             if (arg is "-h" or "--help")
-            {
-                options.ShowHelp = true;
-                return CliOptionsParseResult.Success(options);
-            }
+                {
+                    options.ShowHelp = true;
+                    return CliOptionsParseResult.Success(options);
+                }
 
-            if (arg is "--units" or "-u")
+                if (arg is "-v" or "--version")
+                {
+                    options.ShowVersion = true;
+                    return CliOptionsParseResult.Success(options);
+                }
+
+                if (arg is "--units" or "-u")
             {
                 if (i + 1 >= args.Length)
                 {

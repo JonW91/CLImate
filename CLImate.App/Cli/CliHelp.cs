@@ -36,5 +36,6 @@ public sealed class CliHelp : ICliHelp
         _console.WriteLine("  --no-colour                     Disable ANSI colours");
         _console.WriteLine("  --colour                        Force ANSI colours on");
         _console.WriteLine("  -h, --help                      Show this help message");
+        _console.WriteLine("  -v, --version                   Show version information");
     }
 }

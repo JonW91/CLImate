@@ -76,6 +76,7 @@ dotnet run --project CLImate.App -- London
 | Option | Short | Description |
 |--------|-------|-------------|
 | `--help` | `-h` | Show help information |
+| `--version` | `-v` | Show version information |
 | `--units <metric\|imperial>` | `-u` | Set temperature/wind units (default: metric) |
 | `--country <code>` | `-c` | Filter by 2-letter country code (e.g., GB, US) |
 | `--today` | `-t` | Show today's forecast with time segments |

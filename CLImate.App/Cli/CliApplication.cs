@@ -86,6 +86,12 @@ public sealed class CliApplication : ICliApplication
             return 0;
         }
 
+        if (options.ShowVersion)
+        {
+            PrintVersion();
+            return 0;
+        }
+
         var locationInput = options.LocationInput;
         if (string.IsNullOrWhiteSpace(locationInput))
         {
@@ -168,5 +174,12 @@ public sealed class CliApplication : ICliApplication
     {
         _console.Write(prompt);
         return _console.ReadLine() ?? string.Empty;
+    }
+
+    private void PrintVersion()
+    {
+        var assembly = typeof(CliApplication).Assembly;
+        var version = assembly.GetName().Version?.ToString(3) ?? "0.0.0";
+        _console.WriteLine($"CLImate version {version}");
     }
 }

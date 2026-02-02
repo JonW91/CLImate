@@ -17,6 +17,7 @@ public sealed class CliOptions
     public bool UseColour { get; set; } = true;
     public string? LocationInput { get; set; }
     public bool ShowHelp { get; set; }
+    public bool ShowVersion { get; set; }
     public bool TodayOnly { get; set; }
     public LayoutMode Layout { get; set; } = LayoutMode.Auto;
 }

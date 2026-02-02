@@ -109,10 +109,15 @@ CLImate/
 │   ├── Rendering/        # Output formatting and display
 │   └── Services/         # Business logic and API clients
 ├── CLImate.Tests/
+│   ├── Cli/              # CLI component tests
 │   ├── Models/           # Model tests
+│   ├── Rendering/        # Rendering tests
 │   └── Services/         # Service tests
+├── .github/workflows/    # CI/CD pipelines
 ├── scripts/              # Build and publish scripts
-└── README.md
+├── README.md
+├── ROADMAP.md            # Development roadmap and progress
+└── CONTRIBUTING.md       # This file
 ```
 
 ## Testing
@@ -123,12 +128,27 @@ CLImate/
 # Run all tests
 dotnet test
 
+# Run with verbose output
+dotnet test --verbosity normal
+
 # Run with coverage
 dotnet test --collect:"XPlat Code Coverage"
 
 # Run specific test class
 dotnet test --filter "FullyQualifiedName~WeatherWarningsServiceTests"
+
+# Run specific test category
+dotnet test --filter "FullyQualifiedName~CliOptionsParserTests"
 ```
+
+### Test Categories
+
+| Category | Location | Description |
+|----------|----------|-------------|
+| `Cli` | `CLImate.Tests/Cli/` | CLI options parsing, terminal info |
+| `Models` | `CLImate.Tests/Models/` | Data model tests |
+| `Rendering` | `CLImate.Tests/Rendering/` | Table and forecast rendering |
+| `Services` | `CLImate.Tests/Services/` | API clients and business logic |
 
 ### Writing Tests
 
@@ -145,7 +165,7 @@ public async Task GetForecastAsync_ValidCoordinates_ReturnsForecast()
     var client = A.Fake<IJsonHttpClient>();
     A.CallTo(() => client.GetAsync<ForecastResponse>(A<string>._, A<CancellationToken>._))
         .Returns(Task.FromResult(new ForecastResponse { /* ... */ }));
-    
+
     var service = new ForecastService(client, new ApiMapper());
 
     // Act

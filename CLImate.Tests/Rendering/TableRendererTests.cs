@@ -11,6 +11,8 @@ public sealed class TableRendererTests
     private readonly IWeatherCodeCatalogue _weatherCodes;
     private readonly IAnsiColouriser _colouriser;
     private readonly ITemperatureColourScale _temperatureColours;
+    private readonly IAsciiArtCatalogue _asciiArt;
+    private readonly IArtColouriser _artColouriser;
     private readonly TableRenderer _renderer;
 
     public TableRendererTests()
@@ -19,15 +21,20 @@ public sealed class TableRendererTests
         _weatherCodes = A.Fake<IWeatherCodeCatalogue>();
         _colouriser = A.Fake<IAnsiColouriser>();
         _temperatureColours = A.Fake<ITemperatureColourScale>();
+        _asciiArt = A.Fake<IAsciiArtCatalogue>();
+        _artColouriser = A.Fake<IArtColouriser>();
 
         A.CallTo(() => _colouriser.ShouldUseColour(A<bool>._)).Returns(false);
         A.CallTo(() => _colouriser.Apply(A<string>._, A<AnsiColour>._, A<bool>._))
             .ReturnsLazily((string text, AnsiColour _, bool _) => text);
         A.CallTo(() => _temperatureColours.GetColour(A<double>._)).Returns(AnsiColour.Default);
         A.CallTo(() => _weatherCodes.Describe(A<int>._))
-            .Returns(new WeatherDescriptor("Clear", "clear_day", AnsiColour.Yellow));
+            .Returns(new WeatherDescriptor("Clear", "clear", AnsiColour.Yellow));
+        A.CallTo(() => _asciiArt.GetArt(A<string>._, A<int?>._)).Returns(string.Empty);
+        A.CallTo(() => _artColouriser.Colourise(A<string>._, A<string>._, A<bool>._))
+            .ReturnsLazily((string art, string _, bool _) => art);
 
-        _renderer = new TableRenderer(_console, _weatherCodes, _colouriser, _temperatureColours);
+        _renderer = new TableRenderer(_console, _weatherCodes, _colouriser, _temperatureColours, _asciiArt, _artColouriser);
     }
 
     [Fact]
@@ -71,7 +78,7 @@ public sealed class TableRendererTests
     {
         var forecast = CreateForecast(dayCount: 0);
 
-        _renderer.RenderHorizontalTable(forecast, showArt: false, useColour: false);
+        _renderer.RenderHorizontalTable(forecast, showArt: false, useColour: false, terminalWidth: 150);
 
         A.CallTo(() => _console.WriteLine(A<string>.That.Contains("No forecast data")))
             .MustHaveHappened();
@@ -82,7 +89,7 @@ public sealed class TableRendererTests
     {
         var forecast = CreateForecast(dayCount: 3);
 
-        _renderer.RenderHorizontalTable(forecast, showArt: false, useColour: false);
+        _renderer.RenderHorizontalTable(forecast, showArt: false, useColour: false, terminalWidth: 150);
 
         A.CallTo(() => _console.WriteLine(A<string>.That.Contains("┌")))
             .MustHaveHappened();
@@ -95,10 +102,35 @@ public sealed class TableRendererTests
     {
         var forecast = CreateForecast(dayCount: 2);
 
-        _renderer.RenderHorizontalTable(forecast, showArt: false, useColour: false);
+        _renderer.RenderHorizontalTable(forecast, showArt: false, useColour: false, terminalWidth: 150);
 
         A.CallTo(() => _weatherCodes.Describe(A<int>._))
             .MustHaveHappened();
+    }
+
+    [Fact]
+    public void RenderHorizontalTable_WithWideTerminal_UsesAsciiArt()
+    {
+        var forecast = CreateForecast(dayCount: 3);
+        A.CallTo(() => _asciiArt.GetArt(A<string>._, A<int?>._))
+            .Returns("  .--.  \n .-(  ).\n(__.__)");
+
+        _renderer.RenderHorizontalTable(forecast, showArt: true, useColour: false, terminalWidth: 160);
+
+        A.CallTo(() => _asciiArt.GetArt(A<string>._, A<int?>._))
+            .MustHaveHappened();
+    }
+
+    [Fact]
+    public void RenderHorizontalTable_WithNarrowTerminal_DoesNotUseAsciiArt()
+    {
+        var forecast = CreateForecast(dayCount: 3);
+
+        _renderer.RenderHorizontalTable(forecast, showArt: true, useColour: false, terminalWidth: 120);
+
+        // With terminalWidth < 140, ASCII art is not used
+        A.CallTo(() => _asciiArt.GetArt(A<string>._, A<int?>._))
+            .MustNotHaveHappened();
     }
 
     private static Forecast CreateForecast(int dayCount)

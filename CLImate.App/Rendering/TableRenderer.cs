@@ -5,7 +5,7 @@ namespace CLImate.App.Rendering;
 
 public interface ITableRenderer
 {
-    void RenderHorizontalTable(Forecast forecast, bool showArt, bool useColour);
+    void RenderHorizontalTable(Forecast forecast, bool showArt, bool useColour, int terminalWidth);
     bool CanRenderHorizontally(Forecast forecast, int terminalWidth);
 }
 
@@ -15,21 +15,29 @@ public sealed class TableRenderer : ITableRenderer
     private readonly IWeatherCodeCatalogue _weatherCodes;
     private readonly IAnsiColouriser _colouriser;
     private readonly ITemperatureColourScale _temperatureColours;
+    private readonly IAsciiArtCatalogue _asciiArt;
+    private readonly IArtColouriser _artColouriser;
 
     private const int MinColumnWidth = 14;
+    private const int ArtColumnWidth = 18;
     private const int BorderWidth = 1;
     private const int MinWidthForHorizontal = 100;
+    private const int MinWidthForArtTable = 140;
 
     public TableRenderer(
         IConsoleIO console,
         IWeatherCodeCatalogue weatherCodes,
         IAnsiColouriser colouriser,
-        ITemperatureColourScale temperatureColours)
+        ITemperatureColourScale temperatureColours,
+        IAsciiArtCatalogue asciiArt,
+        IArtColouriser artColouriser)
     {
         _console = console;
         _weatherCodes = weatherCodes;
         _colouriser = colouriser;
         _temperatureColours = temperatureColours;
+        _asciiArt = asciiArt;
+        _artColouriser = artColouriser;
     }
 
     public bool CanRenderHorizontally(Forecast forecast, int terminalWidth)
@@ -41,7 +49,7 @@ public sealed class TableRenderer : ITableRenderer
         return terminalWidth >= requiredWidth && terminalWidth >= MinWidthForHorizontal;
     }
 
-    public void RenderHorizontalTable(Forecast forecast, bool showArt, bool useColour)
+    public void RenderHorizontalTable(Forecast forecast, bool showArt, bool useColour, int terminalWidth)
     {
         var colourEnabled = _colouriser.ShouldUseColour(useColour);
         var units = forecast.Units;
@@ -53,7 +61,9 @@ public sealed class TableRenderer : ITableRenderer
             return;
         }
 
-        var columnWidth = Math.Max(MinColumnWidth, 16);
+        // Determine if we have enough width for ASCII art in table
+        var useAsciiArt = showArt && terminalWidth >= MinWidthForArtTable;
+        var columnWidth = useAsciiArt ? ArtColumnWidth : Math.Max(MinColumnWidth, 16);
         var totalWidth = (days.Count * columnWidth) + days.Count + 1;
 
         _console.WriteLine();
@@ -70,14 +80,22 @@ public sealed class TableRenderer : ITableRenderer
         // Separator
         _console.WriteLine(BuildHorizontalBorder(days.Count, columnWidth, '├', '┼', '┤'));
 
-        // Weather icons row (compact text representation)
-        var weatherIcons = days.Select(d =>
+        // Weather art/icons - multiple rows if using ASCII art
+        if (useAsciiArt)
         {
-            var descriptor = _weatherCodes.Describe(d.WeatherCode);
-            var icon = GetWeatherEmoji(descriptor.ArtKey);
-            return CenterText(icon, columnWidth);
-        }).ToList();
-        _console.WriteLine(BuildRow(weatherIcons, '│'));
+            RenderAsciiArtRows(days, columnWidth, colourEnabled);
+        }
+        else
+        {
+            // Fallback to simple text icons for narrow terminals
+            var weatherIcons = days.Select(d =>
+            {
+                var descriptor = _weatherCodes.Describe(d.WeatherCode);
+                var icon = GetCompactWeatherIcon(descriptor.ArtKey);
+                return CenterText(icon, columnWidth);
+            }).ToList();
+            _console.WriteLine(BuildRow(weatherIcons, '│'));
+        }
 
         // Weather descriptions
         var weatherDescs = days.Select(d =>
@@ -104,7 +122,7 @@ public sealed class TableRenderer : ITableRenderer
         var precip = days.Select(d =>
         {
             var value = $"{FormatValue(d.PrecipitationSum)}{units.Precipitation}";
-            return CenterText($"💧 {value}", columnWidth);
+            return CenterText($"Rain: {value}", columnWidth);
         }).ToList();
         _console.WriteLine(BuildRow(precip, '│'));
 
@@ -112,7 +130,7 @@ public sealed class TableRenderer : ITableRenderer
         var wind = days.Select(d =>
         {
             var value = $"{FormatValue(d.WindSpeedMax)}{units.WindSpeed}";
-            return CenterText($"💨 {value}", columnWidth);
+            return CenterText($"Wind: {value}", columnWidth);
         }).ToList();
         _console.WriteLine(BuildRow(wind, '│'));
 
@@ -127,7 +145,7 @@ public sealed class TableRenderer : ITableRenderer
                     !string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
                 {
                     var truncated = TruncateText(warning, columnWidth - 4);
-                    return CenterText($"⚠️ {truncated}", columnWidth);
+                    return CenterText($"! {truncated}", columnWidth);
                 }
                 return CenterText("—", columnWidth);
             }).ToList();
@@ -136,6 +154,50 @@ public sealed class TableRenderer : ITableRenderer
 
         // Bottom border
         _console.WriteLine(BuildHorizontalBorder(days.Count, columnWidth, '└', '┴', '┘'));
+    }
+
+    private void RenderAsciiArtRows(IReadOnlyList<DailyForecast> days, int columnWidth, bool colourEnabled)
+    {
+        // Get art for each day - use small size for table cells
+        var artLines = new List<string[]>();
+        var maxLines = 0;
+
+        foreach (var day in days)
+        {
+            var descriptor = _weatherCodes.Describe(day.WeatherCode);
+            var artKey = descriptor.ArtKey;
+
+            // Get small art and split into lines, then colorize
+            var art = _asciiArt.GetArt(artKey, 50); // Request small art (width < 70 triggers small)
+            var lines = string.IsNullOrEmpty(art) 
+                ? [GetCompactWeatherIcon(artKey)] 
+                : art.Split('\n');
+
+            // Colorize if enabled
+            if (colourEnabled && lines.Length > 1)
+            {
+                lines = lines.Select(line => _artColouriser.Colourise(line, artKey, colourEnabled)).ToArray();
+            }
+
+            artLines.Add(lines);
+            maxLines = Math.Max(maxLines, lines.Length);
+        }
+
+        // Render each line of art across all days
+        for (var lineIdx = 0; lineIdx < maxLines; lineIdx++)
+        {
+            var rowCells = new List<string>();
+            for (var dayIdx = 0; dayIdx < days.Count; dayIdx++)
+            {
+                var lines = artLines[dayIdx];
+                var line = lineIdx < lines.Length ? lines[lineIdx].TrimEnd() : "";
+
+                // Center the art line in the column, accounting for ANSI codes
+                var visibleLen = GetVisibleLength(line);
+                rowCells.Add(CenterTextWithAnsi(line, columnWidth, visibleLen));
+            }
+            _console.WriteLine(BuildRowWithAnsi(rowCells, '│'));
+        }
     }
 
     private string FormatTemp(double value, string unit, bool colourEnabled)
@@ -160,24 +222,26 @@ public sealed class TableRenderer : ITableRenderer
         return date;
     }
 
-    private static string GetWeatherEmoji(string artKey)
+    private static string GetCompactWeatherIcon(string artKey)
     {
+        // Universal ASCII icons that work on all terminals
         return artKey.ToLowerInvariant() switch
         {
-            "clear_day" or "sunny" => "☀️",
-            "clear_night" => "🌙",
-            "partly_cloudy" or "partly_cloudy_day" => "⛅",
-            "partly_cloudy_night" => "☁️",
-            "cloudy" or "overcast" => "☁️",
-            "fog" or "mist" => "🌫️",
-            "drizzle" or "light_rain" => "🌦️",
-            "rain" or "moderate_rain" or "heavy_rain" => "🌧️",
-            "freezing_rain" or "freezing_drizzle" => "🌨️",
-            "snow" or "light_snow" or "heavy_snow" => "❄️",
-            "sleet" => "🌨️",
-            "thunderstorm" => "⛈️",
-            "hail" => "🌨️",
-            _ => "🌡️"
+            "clear" or "clear_day" or "sunny" => @"\ | /  (O)  / | \",
+            "clear_night" => "( C )",
+            "partly_cloudy" or "partly_cloudy_day" => @"\|/ .--.",
+            "partly_cloudy_night" => "C .--.",
+            "cloudy" or "overcast" => ".--. .--.  ",
+            "fog" or "mist" => "- _ - _ -",
+            "drizzle" or "light_rain" => ".--. ' '",
+            "rain" or "moderate_rain" or "heavy_rain" => ".--. / / /",
+            "freezing_rain" or "freezing_drizzle" => ".--. * / *",
+            "snow" or "light_snow" or "heavy_snow" => ".--. * * *",
+            "sleet" => ".--. /* /*",
+            "thunderstorm" => ".--.  /\\/\\",
+            "thunderstorm_hail" => ".--.  *//\\",
+            "hail" or "snow_grains" => ".--. o o o",
+            _ => "  ?  "
         };
     }
 

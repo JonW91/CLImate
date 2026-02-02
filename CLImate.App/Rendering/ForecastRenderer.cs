@@ -51,7 +51,7 @@ public sealed class ForecastRenderer : IForecastRenderer
 
         if (useHorizontal)
         {
-            _tableRenderer.RenderHorizontalTable(forecast, showArt, useColour);
+            _tableRenderer.RenderHorizontalTable(forecast, showArt, useColour, _terminalInfo.Width);
             return;
         }
 

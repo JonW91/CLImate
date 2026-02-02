@@ -54,13 +54,24 @@ public sealed class AsciiArtCatalogue : IAsciiArtCatalogue
 
     private AsciiArtSets? LoadSets()
     {
-        var path = Path.Combine(AppContext.BaseDirectory, "Assets", "ascii-art.json");
-        if (!File.Exists(path))
+        try
+        {
+            var path = Path.Combine(AppContext.BaseDirectory, "Assets", "ascii-art.json");
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            var json = File.ReadAllText(path);
+            return JsonSerializer.Deserialize<AsciiArtSets>(json, _options);
+        }
+        catch (IOException)
         {
             return null;
         }
-
-        var json = File.ReadAllText(path);
-        return JsonSerializer.Deserialize<AsciiArtSets>(json, _options);
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 }

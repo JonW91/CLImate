@@ -66,10 +66,10 @@ catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
 - [x] Validate country codes against ISO 3166-1 catalogue - Added IsValidCode() with full country list
 - [x] Handle special characters in location names - Uri.EscapeDataString handles encoding
 
-### 1.4 Graceful Degradation
-- [ ] Work without MeteoBlue API key (warnings show "unavailable")
-- [ ] Fallback if ASCII art file is missing
-- [ ] Handle terminals without ANSI support
+### 1.4 Graceful Degradation ✅
+- [x] Work without MeteoBlue API key (warnings show "none", service returns empty)
+- [x] Fallback if ASCII art file is missing/corrupt (shows text labels instead)
+- [x] Handle terminals without ANSI support (checks NO_COLOR env, IsOutputRedirected)
 
 ---
 

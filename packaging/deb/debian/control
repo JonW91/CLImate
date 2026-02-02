@@ -1,0 +1,26 @@
+Source: climate
+Section: utils
+Priority: optional
+Maintainer: JonW91 <jonw91@users.noreply.github.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.0
+Homepage: https://github.com/JonW91/CLImate
+Vcs-Browser: https://github.com/JonW91/CLImate
+Vcs-Git: https://github.com/JonW91/CLImate.git
+Rules-Requires-Root: no
+
+Package: climate
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Cross-platform CLI weather forecast with ASCII art
+ CLImate is a command-line weather forecast application built with .NET 10.
+ Get beautiful ASCII art weather forecasts directly in your terminal.
+ .
+ Features include:
+  - Global location search by city, region, or address
+  - Colorful ASCII art weather displays
+  - 7-day forecasts with daily high/low temperatures
+  - Today view with morning/afternoon/evening/night segments
+  - 24-hour hourly forecasts
+  - Metric and Imperial unit support
+  - Adaptive terminal layout

@@ -1,0 +1,34 @@
+{
+    "$schema": "https://raw.githubusercontent.com/ScoopInstaller/Scoop/master/schema.json",
+    "version": "0.1.0-beta",
+    "description": "Cross-platform CLI weather forecast with ASCII art",
+    "homepage": "https://github.com/JonW91/CLImate",
+    "license": "MIT",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/JonW91/CLImate/releases/download/v0.1.0-beta/climate-windows-x64.zip",
+            "hash": "PLACEHOLDER_SHA256_WINDOWS_X64"
+        }
+    },
+    "bin": "climate.exe",
+    "checkver": {
+        "github": "https://github.com/JonW91/CLImate"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/JonW91/CLImate/releases/download/v$version/climate-windows-x64.zip"
+            }
+        }
+    },
+    "notes": [
+        "CLImate - Terminal weather forecasts with ASCII art",
+        "",
+        "Usage:",
+        "  climate London",
+        "  climate --today Paris",
+        "  climate --hourly \"New York\"",
+        "",
+        "For weather warnings, set METEOBLUE_API_KEY environment variable."
+    ]
+}

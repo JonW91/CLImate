@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	# Binary is pre-built, nothing to compile
+
+override_dh_auto_install:
+	mkdir -p debian/climate/usr/bin
+	mkdir -p debian/climate/usr/share/climate/Assets
+	install -m 755 climate debian/climate/usr/bin/climate
+	cp -r Assets/* debian/climate/usr/share/climate/Assets/ 2>/dev/null || true
+
+override_dh_shlibdeps:
+	# Skip shared library dependency check (self-contained binary)

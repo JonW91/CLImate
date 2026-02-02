@@ -1,0 +1,8 @@
+climate (0.1.0~beta-1) unstable; urgency=low
+
+  * Initial beta release
+  * ASCII art weather forecasts
+  * 7-day and hourly forecast modes
+  * Cross-platform support
+
+ -- JonW91 <jonw91@users.noreply.github.com>  %(date -R)

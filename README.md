@@ -88,7 +88,8 @@ We're working on getting CLImate into popular package managers:
 
 ```bash
 # Coming soon!
-brew install jonw91/tap/climate
+brew tap jonw91/climate
+brew install climate
 ```
 </details>
 
@@ -118,6 +119,31 @@ choco install climate
 # Coming soon!
 winget install JonW91.CLImate
 ```
+</details>
+
+<details>
+<summary><strong>🎩 DNF/RPM (Fedora/RHEL/CentOS)</strong> - Planned</summary>
+
+```bash
+# Coming soon via COPR!
+sudo dnf copr enable jonw91/climate
+sudo dnf install climate
+
+# Or install directly from release:
+curl -fsSL https://github.com/JonW91/CLImate/releases/latest/download/climate_0.1.0~beta_amd64.deb -o climate.deb
+sudo dnf install ./climate.rpm
+```
+</details>
+
+<details>
+<summary><strong>📦 APT/DEB (Debian/Ubuntu)</strong> - Available</summary>
+
+```bash
+# Download and install DEB package:
+curl -fsSL https://github.com/JonW91/CLImate/releases/latest/download/climate_0.1.0~beta_amd64.deb -o climate.deb
+sudo dpkg -i climate.deb
+```
+</details>
 </details>
 
 ### Option 4: .NET Global Tool

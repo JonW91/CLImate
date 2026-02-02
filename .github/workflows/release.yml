@@ -55,8 +55,85 @@ jobs:
             (cd dist/$RID && tar -czf "../climate-${ASSET_OS}-${RID#*-}.tar.gz" "$BIN_NAME" Assets/)
           fi
 
+      - name: Build DEB package (Linux x64 only)
+        if: matrix.rid == 'linux-x64'
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION="${VERSION//-/~}"
+          PKG_DIR="climate_${PKG_VERSION}_amd64"
+
+          mkdir -p "${PKG_DIR}/DEBIAN"
+          mkdir -p "${PKG_DIR}/usr/bin"
+          mkdir -p "${PKG_DIR}/usr/share/climate/Assets"
+
+          cp dist/linux-x64/climate "${PKG_DIR}/usr/bin/climate"
+          chmod 755 "${PKG_DIR}/usr/bin/climate"
+          cp -r dist/linux-x64/Assets/* "${PKG_DIR}/usr/share/climate/Assets/" 2>/dev/null || true
+
+          cat > "${PKG_DIR}/DEBIAN/control" << EOF
+          Package: climate
+          Version: ${PKG_VERSION}-1
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: JonW91 <jonw91@users.noreply.github.com>
+          Homepage: https://github.com/JonW91/CLImate
+          Description: Cross-platform CLI weather forecast with ASCII art
+           CLImate is a command-line weather forecast application built with .NET 10.
+           Get beautiful ASCII art weather forecasts directly in your terminal.
+          EOF
+
+          dpkg-deb --build "${PKG_DIR}"
+          mv "${PKG_DIR}.deb" dist/
+
       - name: Upload assets
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/climate-*
+          files: |
+            dist/climate-*
+            dist/*.deb
           draft: true
+
+  checksums:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download release assets
+        uses: robinraju/release-downloader@v1
+        with:
+          tag: ${{ github.ref_name }}
+          fileName: "*"
+          out-file-path: assets
+
+      - name: Generate checksums
+        run: |
+          cd assets
+          sha256sum climate-* *.deb 2>/dev/null | tee SHA256SUMS.txt
+
+      - name: Upload checksums
+        uses: softprops/action-gh-release@v2
+        with:
+          files: assets/SHA256SUMS.txt
+          draft: true
+
+  nuget:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Pack NuGet
+        run: dotnet pack CLImate.App -c Release -o nupkg
+
+      - name: Upload NuGet artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-package
+          path: nupkg/*.nupkg
+

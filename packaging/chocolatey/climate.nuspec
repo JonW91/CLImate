@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>climate</id>
+    <version>0.1.0-beta</version>
+    <title>CLImate - Terminal Weather Forecast</title>
+    <authors>JonW91</authors>
+    <owners>JonW91</owners>
+    <projectUrl>https://github.com/JonW91/CLImate</projectUrl>
+    <licenseUrl>https://github.com/JonW91/CLImate/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/JonW91/CLImate</projectSourceUrl>
+    <docsUrl>https://github.com/JonW91/CLImate#readme</docsUrl>
+    <bugTrackerUrl>https://github.com/JonW91/CLImate/issues</bugTrackerUrl>
+    <tags>weather forecast cli terminal ascii-art dotnet cross-platform</tags>
+    <summary>Cross-platform CLI weather forecast with beautiful ASCII art</summary>
+    <description>
+CLImate is a cross-platform command-line weather forecast application built with .NET 10.
+
+Features:
+- Global location search by city, region, or address
+- Colorful ASCII art weather displays
+- 7-day forecasts with daily high/low temperatures
+- Today view with morning/afternoon/evening/night segments
+- 24-hour hourly forecasts
+- Metric and Imperial unit support
+- Adaptive terminal layout
+- Weather warnings (with MeteoBlue API key)
+
+Usage:
+  climate London
+  climate --today Paris
+  climate --hourly "New York, NY"
+  climate --units imperial Chicago
+    </description>
+    <releaseNotes>https://github.com/JonW91/CLImate/releases</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

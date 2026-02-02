@@ -5,8 +5,8 @@ namespace CLImate.App.Rendering;
 
 public interface IForecastRenderer
 {
-    void RenderDaily(Forecast forecast, bool showArt, bool useColor);
-    void RenderToday(Forecast forecast, bool showArt, bool useColor);
+    void RenderDaily(Forecast forecast, bool showArt, bool useColour);
+    void RenderToday(Forecast forecast, bool showArt, bool useColour);
 }
 
 public sealed class ForecastRenderer : IForecastRenderer
@@ -14,30 +14,30 @@ public sealed class ForecastRenderer : IForecastRenderer
     private readonly IConsoleIO _console;
     private readonly IAsciiArtCatalog _asciiArt;
     private readonly IWeatherCodeCatalog _weatherCodes;
-    private readonly IAnsiColorizer _colorizer;
-    private readonly ITemperatureColorScale _temperatureColors;
-    private readonly IArtColorizer _artColorizer;
+    private readonly IAnsiColouriser _colouriser;
+    private readonly ITemperatureColourScale _temperatureColours;
+    private readonly IArtColouriser _artColouriser;
 
     public ForecastRenderer(
         IConsoleIO console,
         IAsciiArtCatalog asciiArt,
         IWeatherCodeCatalog weatherCodes,
-        IAnsiColorizer colorizer,
-        ITemperatureColorScale temperatureColors,
-        IArtColorizer artColorizer)
+        IAnsiColouriser colouriser,
+        ITemperatureColourScale temperatureColours,
+        IArtColouriser artColouriser)
     {
         _console = console;
         _asciiArt = asciiArt;
         _weatherCodes = weatherCodes;
-        _colorizer = colorizer;
-        _temperatureColors = temperatureColors;
-        _artColorizer = artColorizer;
+        _colouriser = colouriser;
+        _temperatureColours = temperatureColours;
+        _artColouriser = artColouriser;
     }
 
-    public void RenderDaily(Forecast forecast, bool showArt, bool useColor)
+    public void RenderDaily(Forecast forecast, bool showArt, bool useColour)
     {
         var units = forecast.Units;
-        var colorEnabled = _colorizer.ShouldUseColor(useColor);
+        var colourEnabled = _colouriser.ShouldUseColour(useColour);
 
         _console.WriteLine();
         _console.WriteLine("Daily forecast (today + 6 days):");
@@ -46,7 +46,7 @@ public sealed class ForecastRenderer : IForecastRenderer
         foreach (var day in forecast.Days)
         {
             var descriptor = _weatherCodes.Describe(day.WeatherCode);
-            var art = BuildArt(descriptor.ArtKey, descriptor.ArtColor, showArt, colorEnabled);
+            var art = BuildArt(descriptor.ArtKey, descriptor.ArtColour, showArt, colourEnabled);
 
             var dateWithDay = FormatDateWithDayOfWeek(day.Date);
             _console.WriteLine($"{dateWithDay}  {descriptor.Description}");
@@ -54,8 +54,8 @@ public sealed class ForecastRenderer : IForecastRenderer
             {
                 _console.WriteLine(art);
             }
-            var high = ColorizeValue(day.TemperatureMax, units.Temperature, colorEnabled);
-            var low = ColorizeValue(day.TemperatureMin, units.Temperature, colorEnabled);
+            var high = ColouriseValue(day.TemperatureMax, units.Temperature, colourEnabled);
+            var low = ColouriseValue(day.TemperatureMin, units.Temperature, colourEnabled);
             _console.WriteLine($"  High/Low: {high} / {low}");
             _console.WriteLine($"  Precip:   {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
             _console.WriteLine($"  Wind:     {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
@@ -64,17 +64,17 @@ public sealed class ForecastRenderer : IForecastRenderer
         }
     }
 
-    public void RenderToday(Forecast forecast, bool showArt, bool useColor)
+    public void RenderToday(Forecast forecast, bool showArt, bool useColour)
     {
         var units = forecast.Units;
-        var colorEnabled = _colorizer.ShouldUseColor(useColor);
+        var colourEnabled = _colouriser.ShouldUseColour(useColour);
         var today = forecast.Today;
 
         _console.WriteLine();
 
         if (today == null || today.Segments.Count == 0)
         {
-            RenderSingleDay(forecast, showArt, colorEnabled);
+            RenderSingleDay(forecast, showArt, colourEnabled);
             return;
         }
 
@@ -90,7 +90,7 @@ public sealed class ForecastRenderer : IForecastRenderer
         foreach (var segment in today.Segments)
         {
             var descriptor = _weatherCodes.Describe(segment.WeatherCode);
-            var art = BuildArt(descriptor.ArtKey, descriptor.ArtColor, showArt, colorEnabled);
+            var art = BuildArt(descriptor.ArtKey, descriptor.ArtColour, showArt, colourEnabled);
 
             _console.WriteLine();
             _console.WriteLine($"{segment.Label}: {descriptor.Description}");
@@ -99,34 +99,34 @@ public sealed class ForecastRenderer : IForecastRenderer
                 _console.WriteLine(art);
             }
 
-            var temp = ColorizeValue(segment.TemperatureAverage, units.Temperature, colorEnabled);
+            var temp = ColouriseValue(segment.TemperatureAverage, units.Temperature, colourEnabled);
             _console.WriteLine($"  Temp:    {temp}");
             _console.WriteLine($"  Precip:  {FormatValue(segment.PrecipitationSum)}{units.Precipitation}");
             _console.WriteLine($"  Wind:    {FormatValue(segment.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(segment.WindGustsMax)}{units.WindGusts})");
         }
     }
 
-    private string BuildArt(string key, AnsiColor artColor, bool showArt, bool colorEnabled)
+    private string BuildArt(string key, AnsiColour artColour, bool showArt, bool colourEnabled)
     {
         if (!showArt)
         {
-            return _colorizer.Apply($"[ {key.Replace('_', ' ').ToUpperInvariant()} ]", artColor, colorEnabled);
+            return _colouriser.Apply($"[ {key.Replace('_', ' ').ToUpperInvariant()} ]", artColour, colourEnabled);
         }
 
         var art = _asciiArt.GetArt(key, GetTerminalWidth());
         if (string.IsNullOrWhiteSpace(art))
         {
-            return _colorizer.Apply($"[ {key.Replace('_', ' ').ToUpperInvariant()} ]", artColor, colorEnabled);
+            return _colouriser.Apply($"[ {key.Replace('_', ' ').ToUpperInvariant()} ]", artColour, colourEnabled);
         }
 
-        return _artColorizer.Colorize(art, key, colorEnabled);
+        return _artColouriser.Colourise(art, key, colourEnabled);
     }
 
-    private string ColorizeValue(double value, string unit, bool colorEnabled)
+    private string ColouriseValue(double value, string unit, bool colourEnabled)
     {
-        var color = _temperatureColors.GetColor(value);
+        var colour = _temperatureColours.GetColour(value);
         var formatted = $"{FormatValue(value)}{unit}";
-        return _colorizer.Apply(formatted, color, colorEnabled);
+        return _colouriser.Apply(formatted, colour, colourEnabled);
     }
 
     private static string GetWarning(Forecast forecast, string date)
@@ -144,7 +144,7 @@ public sealed class ForecastRenderer : IForecastRenderer
         return double.IsNaN(value) ? "n/a" : value.ToString("0.#");
     }
 
-    private void RenderSingleDay(Forecast forecast, bool showArt, bool colorEnabled)
+    private void RenderSingleDay(Forecast forecast, bool showArt, bool colourEnabled)
     {
         if (forecast.Days.Count == 0)
         {
@@ -155,7 +155,7 @@ public sealed class ForecastRenderer : IForecastRenderer
         var units = forecast.Units;
         var day = forecast.Days[0];
         var descriptor = _weatherCodes.Describe(day.WeatherCode);
-        var art = BuildArt(descriptor.ArtKey, descriptor.ArtColor, showArt, colorEnabled);
+        var art = BuildArt(descriptor.ArtKey, descriptor.ArtColour, showArt, colourEnabled);
         var dateWithDay = FormatDateWithDayOfWeek(day.Date);
 
         _console.WriteLine($"Today ({dateWithDay})  {descriptor.Description}");
@@ -164,8 +164,8 @@ public sealed class ForecastRenderer : IForecastRenderer
             _console.WriteLine(art);
         }
 
-        var high = ColorizeValue(day.TemperatureMax, units.Temperature, colorEnabled);
-        var low = ColorizeValue(day.TemperatureMin, units.Temperature, colorEnabled);
+        var high = ColouriseValue(day.TemperatureMax, units.Temperature, colourEnabled);
+        var low = ColouriseValue(day.TemperatureMin, units.Temperature, colourEnabled);
         _console.WriteLine($"  Temp:    {low} → {high}");
         _console.WriteLine($"  Precip:  {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
         _console.WriteLine($"  Wind:    {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");

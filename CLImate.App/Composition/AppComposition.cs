@@ -45,9 +45,9 @@ public static class AppComposition
         services.AddSingleton<IMeteoBlueWarningsClient, MeteoBlueWarningsClient>();
         services.AddSingleton<IWeatherWarningsService, WeatherWarningsService>();
         services.AddSingleton<IAsciiArtCatalog, AsciiArtCatalog>();
-        services.AddSingleton<IAnsiColorizer, AnsiColorizer>();
-        services.AddSingleton<IArtColorizer, ArtColorizer>();
-        services.AddSingleton<ITemperatureColorScale, TemperatureColorScale>();
+        services.AddSingleton<IAnsiColouriser, AnsiColouriser>();
+        services.AddSingleton<IArtColouriser, ArtColouriser>();
+        services.AddSingleton<ITemperatureColourScale, TemperatureColourScale>();
         services.AddSingleton<IWeatherCodeCatalog, WeatherCodeCatalog>();
         services.AddSingleton<IForecastRenderer, ForecastRenderer>();
         services.AddSingleton<ICliApplication, CliApplication>();

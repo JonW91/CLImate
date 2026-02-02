@@ -1,12 +1,12 @@
 namespace CLImate.App.Rendering;
 
-public enum AnsiColor
+public enum AnsiColour
 {
     Default,
-    DarkGray,
+    DarkGrey,
     Red,
     Yellow,
     Blue,
-    Gray,
+    Grey,
     White
 }

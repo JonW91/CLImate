@@ -70,18 +70,20 @@ jobs:
           chmod 755 "${PKG_DIR}/usr/bin/climate"
           cp -r dist/linux-x64/Assets/* "${PKG_DIR}/usr/share/climate/Assets/" 2>/dev/null || true
 
-          cat > "${PKG_DIR}/DEBIAN/control" << EOF
-          Package: climate
-          Version: ${PKG_VERSION}-1
-          Section: utils
-          Priority: optional
-          Architecture: amd64
-          Maintainer: JonW91 <jonw91@users.noreply.github.com>
-          Homepage: https://github.com/JonW91/CLImate
-          Description: Cross-platform CLI weather forecast with ASCII art
-           CLImate is a command-line weather forecast application built with .NET 10.
-           Get beautiful ASCII art weather forecasts directly in your terminal.
-          EOF
+          cat > "${PKG_DIR}/DEBIAN/control" << 'CONTROL'
+Package: climate
+Version: ${PKG_VERSION}-1
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: JonW91 <jonw91@users.noreply.github.com>
+Homepage: https://github.com/JonW91/CLImate
+Description: Cross-platform CLI weather forecast with ASCII art
+ CLImate is a command-line weather forecast application built with .NET 10.
+ Get beautiful ASCII art weather forecasts directly in your terminal.
+CONTROL
+          # Replace version placeholder
+          sed -i "s/\${PKG_VERSION}/${PKG_VERSION}/g" "${PKG_DIR}/DEBIAN/control"
 
           dpkg-deb --build "${PKG_DIR}"
           mv "${PKG_DIR}.deb" dist/

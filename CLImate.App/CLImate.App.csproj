@@ -6,6 +6,19 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <!-- .NET Global Tool Configuration -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>climate</ToolCommandName>
+    <PackageId>CLImate</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>JonW91</Authors>
+    <Description>CLI weather forecasts with beautiful ASCII art. Get 7-day forecasts directly in your terminal.</Description>
+    <PackageProjectUrl>https://github.com/JonW91/CLImate</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/JonW91/CLImate</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>weather;cli;terminal;forecast;ascii-art;dotnet-tool</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +28,7 @@
     <None Include="Assets\\country-codes.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

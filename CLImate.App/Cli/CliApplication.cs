@@ -48,6 +48,29 @@ public sealed class CliApplication : ICliApplication
 
     public async Task<int> RunAsync(string[] args, CancellationToken cancellationToken = default)
     {
+        try
+        {
+            return await RunCoreAsync(args, cancellationToken);
+        }
+        catch (HttpRequestException)
+        {
+            _console.WriteLine("Unable to reach weather service. Check your internet connection and try again.");
+            return 1;
+        }
+        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            _console.WriteLine("Request timed out. The weather service may be unavailable. Please try again.");
+            return 1;
+        }
+        catch (OperationCanceledException)
+        {
+            _console.WriteLine("Operation cancelled.");
+            return 1;
+        }
+    }
+
+    private async Task<int> RunCoreAsync(string[] args, CancellationToken cancellationToken)
+    {
         var parseResult = _optionsParser.Parse(args);
         if (!parseResult.IsValid)
         {

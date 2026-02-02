@@ -40,24 +40,29 @@ Already configured in publish scripts. Produces single-file executables for:
 
 **Action**: Verify publish scripts work and add to CI/CD.
 
-### 1.2 Robust Error Handling
+### 1.2 Robust Error Handling ✅
 Add graceful handling for:
-- [ ] Network timeout/connectivity issues
+- [x] Network timeout/connectivity issues
 - [ ] API rate limiting (Open-Meteo is generous but has limits)
-- [ ] Invalid API responses
+- [x] Invalid API responses
 - [ ] Missing/corrupt asset files
 
 ```csharp
-// Example: Wrap HTTP calls with user-friendly errors
-catch (HttpRequestException ex)
+// Implemented in CliApplication.cs - wraps RunCoreAsync with try/catch
+catch (HttpRequestException)
 {
-    _console.WriteLine("Unable to reach weather service. Check your internet connection.");
+    _console.WriteLine("Unable to reach weather service. Check your internet connection and try again.");
+    return 1;
+}
+catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+{
+    _console.WriteLine("Request timed out. The weather service may be unavailable. Please try again.");
     return 1;
 }
 ```
 
 ### 1.3 Input Validation
-- [ ] Sanitise location input (prevent injection in URLs)
+- [x] Sanitise location input (prevent injection in URLs) - Uses Uri.EscapeDataString in GeocodingService
 - [ ] Validate country codes against catalogue
 - [ ] Handle special characters in location names
 
@@ -94,27 +99,29 @@ irm https://raw.githubusercontent.com/JonW91/CLImate/main/scripts/install.ps1 | 
 | **Snap** | Linux | 🔲 Future | Universal Linux package |
 | **Winget** | Windows | 🔲 Future | Microsoft Store compatible |
 
-### 2.3 .NET Global Tool
+### 2.3 .NET Global Tool ✅
 ```bash
 dotnet tool install --global CLImate
 ```
-**Action Required:**
-- [ ] Add `<PackAsTool>true</PackAsTool>` to csproj
-- [ ] Configure NuGet package metadata
+**Status: Configured** - Added to CLImate.App.csproj
+- [x] Add `<PackAsTool>true</PackAsTool>` to csproj
+- [x] Configure NuGet package metadata
 - [ ] Publish to NuGet.org
 
 ```xml
-<!-- Add to CLImate.App.csproj -->
+<!-- Already added to CLImate.App.csproj -->
 <PropertyGroup>
   <PackAsTool>true</PackAsTool>
   <ToolCommandName>climate</ToolCommandName>
   <PackageId>CLImate</PackageId>
   <Version>0.1.0</Version>
   <Authors>JonW91</Authors>
-  <Description>CLI weather forecasts with ASCII art</Description>
+  <Description>CLI weather forecasts with beautiful ASCII art. Get 7-day forecasts directly in your terminal.</Description>
   <PackageProjectUrl>https://github.com/JonW91/CLImate</PackageProjectUrl>
+  <RepositoryUrl>https://github.com/JonW91/CLImate</RepositoryUrl>
   <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  <PackageTags>weather;cli;terminal;forecast</PackageTags>
+  <PackageTags>weather;cli;terminal;forecast;ascii-art;dotnet-tool</PackageTags>
+  <PackageReadmeFile>README.md</PackageReadmeFile>
 </PropertyGroup>
 ```
 

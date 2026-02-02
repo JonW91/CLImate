@@ -50,7 +50,15 @@ irm https://raw.githubusercontent.com/JonW91/CLImate/main/scripts/install.ps1 | 
 
 Or download directly from the [Releases](https://github.com/JonW91/CLImate/releases) page.
 
-### Option 2: Build from Source
+### Option 2: .NET Global Tool
+
+If you have the [.NET 10 SDK](https://dotnet.microsoft.com/download) installed:
+
+```bash
+dotnet tool install --global CLImate
+```
+
+### Option 3: Build from Source
 
 Requires [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
@@ -60,6 +68,7 @@ cd CLImate
 dotnet build
 dotnet run --project CLImate.App -- London
 ```
+
 
 ## Command-Line Options
 

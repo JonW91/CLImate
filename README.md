@@ -84,23 +84,25 @@ $env:PATH += ";$env:LOCALAPPDATA\CLImate"
 We're working on getting CLImate into popular package managers:
 
 <details>
-<summary><strong>🍺 Homebrew (macOS/Linux)</strong> - Planned</summary>
+<summary><strong>🍺 Homebrew (macOS/Linux)</strong> - Available</summary>
 
 ```bash
-# Coming soon!
 brew tap jonw91/climate
 brew install climate
 ```
+
+> **Note:** SHA256 hashes need to be updated after each release. See [homebrew-climate](https://github.com/JonW91/homebrew-climate).
 </details>
 
 <details>
-<summary><strong>🪟 Scoop (Windows)</strong> - Planned</summary>
+<summary><strong>🪟 Scoop (Windows)</strong> - Available</summary>
 
 ```powershell
-# Coming soon!
 scoop bucket add climate https://github.com/JonW91/scoop-climate
 scoop install climate
 ```
+
+> **Note:** SHA256 hash needs to be updated after each release. See [scoop-climate](https://github.com/JonW91/scoop-climate).
 </details>
 
 <details>

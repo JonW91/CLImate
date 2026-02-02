@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,7 +11,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>climate</ToolCommandName>
     <PackageId>CLImate</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.0-beta</Version>
     <Authors>JonW91</Authors>
     <Description>CLI weather forecasts with beautiful ASCII art. Get 7-day forecasts directly in your terminal.</Description>
     <PackageProjectUrl>https://github.com/JonW91/CLImate</PackageProjectUrl>

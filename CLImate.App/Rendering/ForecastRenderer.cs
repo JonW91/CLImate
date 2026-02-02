@@ -7,6 +7,7 @@ public interface IForecastRenderer
 {
     void RenderDaily(Forecast forecast, bool showArt, bool useColour, LayoutMode layout = LayoutMode.Auto);
     void RenderToday(Forecast forecast, bool showArt, bool useColour);
+    void RenderHourly(Forecast forecast, bool showArt, bool useColour);
 }
 
 public sealed class ForecastRenderer : IForecastRenderer
@@ -285,6 +286,63 @@ public sealed class ForecastRenderer : IForecastRenderer
         catch
         {
             return null;
+        }
+    }
+
+    public void RenderHourly(Forecast forecast, bool showArt, bool useColour)
+    {
+        var colourEnabled = _colouriser.ShouldUseColour(useColour);
+        var units = forecast.Units;
+        var hourly = forecast.Hourly;
+
+        _console.WriteLine();
+
+        if (hourly == null || hourly.Hours.Count == 0)
+        {
+            _console.WriteLine("No hourly data available.");
+            return;
+        }
+
+        var dayHeader = FormatDayHeader(hourly.Date);
+        _console.WriteLine($"24-Hour Forecast · {dayHeader}");
+        _console.WriteLine(new string('─', 50));
+        _console.WriteLine();
+
+        // Check for warnings
+        if (forecast.WarningsByDate.TryGetValue(hourly.Date, out var warning) &&
+            !string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
+        {
+            _console.WriteLine($"  ! Warning: {warning}");
+            _console.WriteLine();
+        }
+
+        // Group hours into blocks of 6 for readability
+        var hourBlocks = new[] { (0, 5, "Night"), (6, 11, "Morning"), (12, 17, "Afternoon"), (18, 23, "Evening") };
+
+        foreach (var (startHour, endHour, blockName) in hourBlocks)
+        {
+            var blockHours = hourly.Hours.Where(h => h.Hour >= startHour && h.Hour <= endHour).ToList();
+            if (blockHours.Count == 0) continue;
+
+            _console.WriteLine($"┌─ {blockName.ToUpperInvariant()} ─────────────────────────────────");
+
+            foreach (var hour in blockHours)
+            {
+                var descriptor = _weatherCodes.Describe(hour.WeatherCode);
+                var temp = ColouriseValue(hour.Temperature, units.Temperature, colourEnabled);
+                var precipValue = double.IsNaN(hour.Precipitation) ? "0" : hour.Precipitation.ToString("0.#");
+                var windValue = double.IsNaN(hour.WindSpeed) ? "n/a" : hour.WindSpeed.ToString("0");
+
+                // Compact format: TIME | TEMP | WEATHER | PRECIP | WIND
+                var weatherShort = descriptor.Description.Length > 15 
+                    ? descriptor.Description[..12] + "..." 
+                    : descriptor.Description.PadRight(15);
+
+                _console.WriteLine($"│  {hour.TimeLabel}  {temp,8}  {weatherShort}  Rain: {precipValue,4}{units.Precipitation}  Wind: {windValue}{units.WindSpeed}");
+            }
+
+            _console.WriteLine($"└──────────────────────────────────────────────────");
+            _console.WriteLine();
         }
     }
 }

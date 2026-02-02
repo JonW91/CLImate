@@ -158,13 +158,18 @@ public sealed class CliApplication : ICliApplication
             cancellationToken);
 
         var forecastWithWarnings = forecast.WithWarnings(warnings);
-        if (options.TodayOnly)
+
+        switch (options.ForecastMode)
         {
-            _forecastRenderer.RenderToday(forecastWithWarnings, options.ShowArt, options.UseColour);
-        }
-        else
-        {
-            _forecastRenderer.RenderDaily(forecastWithWarnings, options.ShowArt, options.UseColour, options.Layout);
+            case ForecastMode.Today:
+                _forecastRenderer.RenderToday(forecastWithWarnings, options.ShowArt, options.UseColour);
+                break;
+            case ForecastMode.Hourly:
+                _forecastRenderer.RenderHourly(forecastWithWarnings, options.ShowArt, options.UseColour);
+                break;
+            default:
+                _forecastRenderer.RenderDaily(forecastWithWarnings, options.ShowArt, options.UseColour, options.Layout);
+                break;
         }
 
         return 0;

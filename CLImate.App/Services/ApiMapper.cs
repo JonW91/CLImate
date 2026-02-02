@@ -35,7 +35,8 @@ public sealed class ApiMapper : IApiMapper
         }
 
         var today = BuildTodayForecast(response?.Hourly, daily.Time[0]);
-        return new Forecast(days, units, today);
+        var hourly = BuildHourlyForecast(response?.Hourly, daily.Time[0]);
+        return new Forecast(days, units, today, hourly);
     }
 
     public List<GeoResult> MapGeocoding(GeocodeResponse? response)
@@ -218,5 +219,43 @@ public sealed class ApiMapper : IApiMapper
 
             return bestCode;
         }
+    }
+
+    private static HourlyForecast? BuildHourlyForecast(Hourly? hourly, string? todayDate)
+    {
+        if (hourly == null || hourly.Time.Count == 0)
+        {
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(todayDate) || !DateTime.TryParse(todayDate, out var today))
+        {
+            return null;
+        }
+
+        var hours = new List<HourForecast>();
+
+        for (var i = 0; i < hourly.Time.Count; i++)
+        {
+            if (!DateTime.TryParse(hourly.Time[i], out var timestamp))
+            {
+                continue;
+            }
+
+            if (timestamp.Date != today.Date)
+            {
+                continue;
+            }
+
+            var code = SafeGetInt(hourly.WeatherCode, i, 0);
+            var temp = SafeGetDouble(hourly.Temperature, i, double.NaN);
+            var precip = SafeGetDouble(hourly.Precipitation, i, double.NaN);
+            var wind = SafeGetDouble(hourly.WindSpeed, i, double.NaN);
+            var gust = SafeGetDouble(hourly.WindGusts, i, double.NaN);
+
+            hours.Add(new HourForecast(timestamp, code, temp, precip, wind, gust));
+        }
+
+        return hours.Count == 0 ? null : new HourlyForecast(todayDate, hours);
     }
 }

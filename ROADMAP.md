@@ -151,6 +151,7 @@ Automatically adjusts output based on terminal dimensions:
 - [x] `--horizontal` / `-H` flag to force table layout
 - [x] `--vertical` / `-V` flag to force list layout
 - [x] Today view (`-t`) also uses table layout with time periods as columns
+- [x] Hourly view (`--hourly`) shows 24-hour forecast grouped by time blocks
 - [x] ASCII art displayed in both horizontal and vertical layouts
 - [x] Universal ASCII characters (no emojis) for cross-terminal compatibility
 
@@ -160,6 +161,7 @@ climate London              # Auto-detect best layout
 climate -H London           # Force horizontal table
 climate -V London           # Force vertical list
 climate -t London           # Today's forecast with time period table
+climate --hourly London     # 24-hour hourly forecast
 ```
 
 ### 3.1 Configuration File

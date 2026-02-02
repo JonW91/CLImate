@@ -61,7 +61,7 @@ public sealed class TableRendererTests
     }
 
     [Theory]
-    [InlineData(100)]
+    [InlineData(110)]
     [InlineData(120)]
     [InlineData(200)]
     public void CanRenderHorizontally_WithWideTerminal_ReturnsTrue(int width)

@@ -124,6 +124,28 @@ public sealed class ForecastRendererTests
             .MustNotHaveHappened();
     }
 
+    [Fact]
+    public void RenderHourly_WithNoHourlyData_PrintsNoDataMessage()
+    {
+        var forecast = CreateForecast(dayCount: 1);
+
+        _renderer.RenderHourly(forecast, showArt: true, useColour: false);
+
+        A.CallTo(() => _console.WriteLine(A<string>.That.Contains("No hourly data")))
+            .MustHaveHappened();
+    }
+
+    [Fact]
+    public void RenderHourly_WithHourlyData_PrintsHourlyForecast()
+    {
+        var forecast = CreateForecastWithHourly();
+
+        _renderer.RenderHourly(forecast, showArt: true, useColour: false);
+
+        A.CallTo(() => _console.WriteLine(A<string>.That.Contains("24-Hour Forecast")))
+            .MustHaveHappened();
+    }
+
     private static Forecast CreateForecast(int dayCount)
     {
         var days = new List<DailyForecast>();
@@ -144,5 +166,39 @@ public sealed class ForecastRendererTests
 
         var units = new ForecastUnits("°C", "mm", "km/h", "km/h");
         return new Forecast(days, units);
+    }
+
+    private static Forecast CreateForecastWithHourly()
+    {
+        var baseDate = DateTime.Today;
+        var days = new List<DailyForecast>
+        {
+            new DailyForecast(
+                date: baseDate.ToString("yyyy-MM-dd"),
+                weatherCode: 1,
+                temperatureMax: 20.0,
+                temperatureMin: 10.0,
+                precipitationSum: 0.5,
+                windSpeedMax: 15.0,
+                windGustsMax: 25.0
+            )
+        };
+
+        var hours = new List<HourForecast>();
+        for (int h = 0; h < 24; h++)
+        {
+            hours.Add(new HourForecast(
+                time: baseDate.AddHours(h),
+                weatherCode: 1,
+                temperature: 15.0 + (h % 12),
+                precipitation: 0.1,
+                windSpeed: 10.0,
+                windGusts: 15.0
+            ));
+        }
+
+        var hourly = new HourlyForecast(baseDate.ToString("yyyy-MM-dd"), hours);
+        var units = new ForecastUnits("°C", "mm", "km/h", "km/h");
+        return new Forecast(days, units, null, hourly);
     }
 }

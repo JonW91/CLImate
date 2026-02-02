@@ -30,6 +30,7 @@ public sealed class CliHelp : ICliHelp
         _console.WriteLine("  -u, --units <metric|imperial>   Units for output (default: metric)");
         _console.WriteLine("  -c, --country <code>            2-letter country code filter (e.g., GB, US)");
         _console.WriteLine("  -t, --today                     Show only today's forecast");
+        _console.WriteLine("  --hourly                        Show 24-hour forecast for today");
         _console.WriteLine("  -H, --horizontal                Force horizontal table layout");
         _console.WriteLine("  -V, --vertical                  Force vertical list layout");
         _console.WriteLine("  --no-art                        Disable ASCII art (use text labels)");

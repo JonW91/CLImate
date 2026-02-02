@@ -29,6 +29,9 @@ climate --units imperial "New York, NY"
 # Today's forecast only with time segments
 climate --today Paris
 
+# 24-hour hourly forecast
+climate --hourly London
+
 # Filter by country code (avoid ambiguity)
 climate --country US Portland
 ```
@@ -80,6 +83,7 @@ dotnet run --project CLImate.App -- London
 | `--units <metric\|imperial>` | `-u` | Set temperature/wind units (default: metric) |
 | `--country <code>` | `-c` | Filter by 2-letter country code (e.g., GB, US) |
 | `--today` | `-t` | Show today's forecast with time segments |
+| `--hourly` | | Show 24-hour hourly forecast for today |
 | `--horizontal` | `-H` | Force horizontal table layout |
 | `--vertical` | `-V` | Force vertical list layout |
 | `--no-art` | | Disable ASCII art, use text labels |

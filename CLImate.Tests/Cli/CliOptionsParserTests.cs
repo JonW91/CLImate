@@ -144,21 +144,21 @@ public sealed class CliOptionsParserTests
     }
 
     [Fact]
-    public void Parse_WithTodayFlag_SetsTodayOnly()
+    public void Parse_WithTodayFlag_SetsTodayForecastMode()
     {
         var result = _parser.Parse(["--today", "London"]);
 
         Assert.True(result.IsValid);
-        Assert.True(result.Options.TodayOnly);
+        Assert.Equal(ForecastMode.Today, result.Options.ForecastMode);
     }
 
     [Fact]
-    public void Parse_WithShortTodayFlag_SetsTodayOnly()
+    public void Parse_WithShortTodayFlag_SetsTodayForecastMode()
     {
         var result = _parser.Parse(["-t", "London"]);
 
         Assert.True(result.IsValid);
-        Assert.True(result.Options.TodayOnly);
+        Assert.Equal(ForecastMode.Today, result.Options.ForecastMode);
     }
 
     [Fact]
@@ -195,6 +195,15 @@ public sealed class CliOptionsParserTests
 
         Assert.True(result.IsValid);
         Assert.Equal(LayoutMode.Vertical, result.Options.Layout);
+    }
+
+    [Fact]
+    public void Parse_WithHourlyFlag_SetsHourlyForecastMode()
+    {
+        var result = _parser.Parse(["--hourly", "London"]);
+
+        Assert.True(result.IsValid);
+        Assert.Equal(ForecastMode.Hourly, result.Options.ForecastMode);
     }
 
     [Fact]

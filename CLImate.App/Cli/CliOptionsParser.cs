@@ -87,7 +87,13 @@ public sealed class CliOptionsParser : ICliOptionsParser
 
             if (arg is "--today" or "-t")
             {
-                options.TodayOnly = true;
+                options.ForecastMode = ForecastMode.Today;
+                continue;
+            }
+
+            if (arg is "--hourly")
+            {
+                options.ForecastMode = ForecastMode.Hourly;
                 continue;
             }
 

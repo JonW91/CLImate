@@ -12,16 +12,16 @@ public interface IForecastRenderer
 public sealed class ForecastRenderer : IForecastRenderer
 {
     private readonly IConsoleIO _console;
-    private readonly IAsciiArtCatalog _asciiArt;
-    private readonly IWeatherCodeCatalog _weatherCodes;
+    private readonly IAsciiArtCatalogue _asciiArt;
+    private readonly IWeatherCodeCatalogue _weatherCodes;
     private readonly IAnsiColouriser _colouriser;
     private readonly ITemperatureColourScale _temperatureColours;
     private readonly IArtColouriser _artColouriser;
 
     public ForecastRenderer(
         IConsoleIO console,
-        IAsciiArtCatalog asciiArt,
-        IWeatherCodeCatalog weatherCodes,
+        IAsciiArtCatalogue asciiArt,
+        IWeatherCodeCatalogue weatherCodes,
         IAnsiColouriser colouriser,
         ITemperatureColourScale temperatureColours,
         IArtColouriser artColouriser)

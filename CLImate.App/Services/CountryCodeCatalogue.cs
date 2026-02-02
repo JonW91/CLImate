@@ -2,11 +2,11 @@ using System.Text.Json;
 
 namespace CLImate.App.Services;
 
-public sealed class CountryCodeCatalog : ICountryCodeCatalog
+public sealed class CountryCodeCatalogue : ICountryCodeCatalogue
 {
     private readonly Dictionary<string, string> _mappings;
 
-    public CountryCodeCatalog()
+    public CountryCodeCatalogue()
     {
         _mappings = LoadMappings();
     }

@@ -1,11 +1,11 @@
 namespace CLImate.App.Rendering;
 
-public interface IWeatherCodeCatalog
+public interface IWeatherCodeCatalogue
 {
     WeatherDescriptor Describe(int code);
 }
 
-public sealed class WeatherCodeCatalog : IWeatherCodeCatalog
+public sealed class WeatherCodeCatalogue : IWeatherCodeCatalogue
 {
     public WeatherDescriptor Describe(int code)
     {

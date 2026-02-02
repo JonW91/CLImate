@@ -49,27 +49,27 @@ public sealed class CliOptionsParser : ICliOptionsParser
                     return CliOptionsParseResult.Failure("Missing value for --country.");
                 }
 
-                options.CountryCode = _locationInputParser.NormalizeCountryCode(args[++i]);
-                continue;
-            }
+                options.CountryCode = _locationInputParser.NormaliseCountryCode(args[++i]);
+                    continue;
+                }
 
-            if (arg is "--no-art")
-            {
-                options.ShowArt = false;
-                continue;
-            }
+                if (arg is "--no-art")
+                {
+                    options.ShowArt = false;
+                    continue;
+                }
 
-            if (arg is "--no-color")
-            {
-                options.UseColor = false;
-                continue;
-            }
+                if (arg is "--no-colour")
+                {
+                    options.UseColour = false;
+                    continue;
+                }
 
-            if (arg is "--color")
-            {
-                options.UseColor = true;
-                continue;
-            }
+                if (arg is "--colour")
+                {
+                    options.UseColour = true;
+                    continue;
+                }
 
             if (arg is "--today" or "-t")
             {
@@ -85,7 +85,7 @@ public sealed class CliOptionsParser : ICliOptionsParser
 
             if (arg.StartsWith("--country=", StringComparison.OrdinalIgnoreCase))
             {
-                options.CountryCode = _locationInputParser.NormalizeCountryCode(arg.Substring("--country=".Length));
+                options.CountryCode = _locationInputParser.NormaliseCountryCode(arg.Substring("--country=".Length));
                 continue;
             }
 

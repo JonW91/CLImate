@@ -4,16 +4,16 @@ public interface ILocationInputParser
 {
     string ExtractPrimaryName(string input);
     string? InferCountryCode(string input);
-    string? NormalizeCountryCode(string? input);
+    string? NormaliseCountryCode(string? input);
 }
 
 public sealed class LocationInputParser : ILocationInputParser
 {
-    private readonly ICountryCodeCatalog _countryCodeCatalog;
+    private readonly ICountryCodeCatalogue _countryCodeCatalogue;
 
-    public LocationInputParser(ICountryCodeCatalog countryCodeCatalog)
+    public LocationInputParser(ICountryCodeCatalogue countryCodeCatalogue)
     {
-        _countryCodeCatalog = countryCodeCatalog;
+        _countryCodeCatalogue = countryCodeCatalogue;
     }
 
     public string ExtractPrimaryName(string input)
@@ -33,7 +33,7 @@ public sealed class LocationInputParser : ILocationInputParser
         return CountryNameToCode(parts[^1]);
     }
 
-    public string? NormalizeCountryCode(string? input)
+    public string? NormaliseCountryCode(string? input)
     {
         if (string.IsNullOrWhiteSpace(input))
         {
@@ -49,5 +49,5 @@ public sealed class LocationInputParser : ILocationInputParser
         return CountryNameToCode(trimmed);
     }
 
-    private string? CountryNameToCode(string name) => _countryCodeCatalog.GetCode(name);
+    private string? CountryNameToCode(string name) => _countryCodeCatalogue.GetCode(name);
 }

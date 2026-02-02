@@ -30,7 +30,7 @@ public sealed class CliHelp : ICliHelp
         _console.WriteLine("  -c, --country <code>            2-letter country code filter (e.g., GB, US)");
         _console.WriteLine("  -t, --today                     Show only today's forecast (morning/afternoon/evening if available)");
         _console.WriteLine("  --no-art                        Disable ASCII art (use text labels)");
-        _console.WriteLine("  --no-color                      Disable ANSI colors");
-        _console.WriteLine("  --color                         Force ANSI colors on");
+        _console.WriteLine("  --no-colour                     Disable ANSI colours");
+        _console.WriteLine("  --colour                        Force ANSI colours on");
     }
 }

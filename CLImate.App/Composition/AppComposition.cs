@@ -34,7 +34,7 @@ public static class AppComposition
         services.AddSingleton<IConsoleIO, ConsoleIO>();
         services.AddSingleton<ICliHelp, CliHelp>();
         services.AddSingleton<ICliOptionsParser, CliOptionsParser>();
-        services.AddSingleton<ICountryCodeCatalog, CountryCodeCatalog>();
+        services.AddSingleton<ICountryCodeCatalogue, CountryCodeCatalogue>();
         services.AddSingleton<ILocationInputParser, LocationInputParser>();
         services.AddSingleton<ILocationFormatter, LocationFormatter>();
         services.AddSingleton<ILocationSelector, LocationSelector>();
@@ -44,11 +44,11 @@ public static class AppComposition
         services.AddSingleton<IForecastService, ForecastService>();
         services.AddSingleton<IMeteoBlueWarningsClient, MeteoBlueWarningsClient>();
         services.AddSingleton<IWeatherWarningsService, WeatherWarningsService>();
-        services.AddSingleton<IAsciiArtCatalog, AsciiArtCatalog>();
+        services.AddSingleton<IAsciiArtCatalogue, AsciiArtCatalogue>();
         services.AddSingleton<IAnsiColouriser, AnsiColouriser>();
         services.AddSingleton<IArtColouriser, ArtColouriser>();
         services.AddSingleton<ITemperatureColourScale, TemperatureColourScale>();
-        services.AddSingleton<IWeatherCodeCatalog, WeatherCodeCatalog>();
+        services.AddSingleton<IWeatherCodeCatalogue, WeatherCodeCatalogue>();
         services.AddSingleton<IForecastRenderer, ForecastRenderer>();
         services.AddSingleton<ICliApplication, CliApplication>();
 

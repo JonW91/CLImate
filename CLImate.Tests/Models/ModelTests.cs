@@ -33,7 +33,7 @@ public sealed class ForecastTests
             ["2026-02-01"] = "Heavy rain"
         };
 
-        var forecast = new Forecast(days, units, warnings);
+        var forecast = new Forecast(days, units, today: null, warningsByDate: warnings);
 
         Assert.Equal(days, forecast.Days);
         Assert.Equal(units, forecast.Units);

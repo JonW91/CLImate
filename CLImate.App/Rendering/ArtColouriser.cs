@@ -13,7 +13,7 @@ public sealed class ArtColouriser : IArtColouriser
     private static readonly HashSet<char> SunChars = new(new[] { 'o', '\\', '/', '|', '*' });
     private static readonly HashSet<char> RainChars = new(new[] { '/' });
     private static readonly HashSet<char> SnowChars = new(new[] { '*' });
-    private static readonly HashSet<char> LightningChars = new(new[] { '/', '_' });
+    private static readonly HashSet<char> LightningChars = new(new[] { '/', '\\' });
     private static readonly HashSet<char> DotChars = new(new[] { '.' });
 
     private readonly IAnsiColouriser _colouriser;

@@ -131,11 +131,11 @@ public sealed class CliApplication : ICliApplication
         var forecastWithWarnings = forecast.WithWarnings(warnings);
         if (options.TodayOnly)
         {
-            _forecastRenderer.RenderToday(forecastWithWarnings, options.ShowArt, options.UseColor);
+            _forecastRenderer.RenderToday(forecastWithWarnings, options.ShowArt, options.UseColour);
         }
         else
         {
-            _forecastRenderer.RenderDaily(forecastWithWarnings, options.ShowArt, options.UseColor);
+            _forecastRenderer.RenderDaily(forecastWithWarnings, options.ShowArt, options.UseColour);
         }
 
         return 0;

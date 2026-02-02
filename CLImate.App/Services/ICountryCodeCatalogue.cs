@@ -1,6 +1,6 @@
 namespace CLImate.App.Services;
 
-public interface ICountryCodeCatalog
+public interface ICountryCodeCatalogue
 {
     string? GetCode(string name);
 }

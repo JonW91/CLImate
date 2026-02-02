@@ -2,12 +2,12 @@ using System.Text.Json;
 
 namespace CLImate.App.Rendering;
 
-public interface IAsciiArtCatalog
+public interface IAsciiArtCatalogue
 {
     string GetArt(string key, int? width);
 }
 
-public sealed class AsciiArtCatalog : IAsciiArtCatalog
+public sealed class AsciiArtCatalogue : IAsciiArtCatalogue
 {
     private const int LargeMinWidth = 100;
     private const int MediumMinWidth = 70;
@@ -16,7 +16,7 @@ public sealed class AsciiArtCatalog : IAsciiArtCatalog
     private readonly JsonSerializerOptions _options;
     private AsciiArtSets? _sets;
 
-    public AsciiArtCatalog(JsonSerializerOptions options)
+    public AsciiArtCatalogue(JsonSerializerOptions options)
     {
         _options = options;
     }

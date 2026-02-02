@@ -146,16 +146,20 @@ docker run --rm ghcr.io/jonw91/climate London
 Automatically adjusts output based on terminal dimensions:
 
 - [x] Detect terminal width/height at runtime
-- [x] Horizontal table layout for wide terminals (100+ columns)
+- [x] Horizontal table layout for wide terminals (140+ columns with ASCII art, 100+ with compact icons)
 - [x] Vertical list layout for narrow terminals
 - [x] `--horizontal` / `-H` flag to force table layout
 - [x] `--vertical` / `-V` flag to force list layout
+- [x] Today view (`-t`) also uses table layout with time periods as columns
+- [x] ASCII art displayed in both horizontal and vertical layouts
+- [x] Universal ASCII characters (no emojis) for cross-terminal compatibility
 
 **Usage:**
 ```bash
 climate London              # Auto-detect best layout
 climate -H London           # Force horizontal table
 climate -V London           # Force vertical list
+climate -t London           # Today's forecast with time period table
 ```
 
 ### 3.1 Configuration File

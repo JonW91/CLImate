@@ -92,14 +92,14 @@ public sealed class ForecastRenderer : IForecastRenderer
             var high = ColouriseValue(day.TemperatureMax, units.Temperature, colourEnabled);
             var low = ColouriseValue(day.TemperatureMin, units.Temperature, colourEnabled);
             _console.WriteLine($"│");
-            _console.WriteLine($"│  🌡️  {low} → {high}");
-            _console.WriteLine($"│  💧 {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
-            _console.WriteLine($"│  💨 {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
+            _console.WriteLine($"│  Temp: {low} -> {high}");
+            _console.WriteLine($"│  Rain: {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
+            _console.WriteLine($"│  Wind: {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
 
             // Warning (only if present)
             if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
             {
-                _console.WriteLine($"│  ⚠️  {warning}");
+                _console.WriteLine($"│  !  {warning}");
             }
 
             _console.WriteLine($"└──────────────────────────────────────");
@@ -108,6 +108,21 @@ public sealed class ForecastRenderer : IForecastRenderer
     }
 
     public void RenderToday(Forecast forecast, bool showArt, bool useColour)
+    {
+        var terminalWidth = _terminalInfo.Width;
+
+        // Use table view for wide terminals
+        if (_tableRenderer.CanRenderTodayHorizontally(forecast, terminalWidth))
+        {
+            _tableRenderer.RenderTodayTable(forecast, showArt, useColour, terminalWidth);
+            return;
+        }
+
+        // Vertical layout for narrow terminals
+        RenderTodayVertical(forecast, showArt, useColour);
+    }
+
+    private void RenderTodayVertical(Forecast forecast, bool showArt, bool useColour)
     {
         var units = forecast.Units;
         var colourEnabled = _colouriser.ShouldUseColour(useColour);
@@ -127,7 +142,7 @@ public sealed class ForecastRenderer : IForecastRenderer
         var warning = GetWarning(forecast, today.Date);
         if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
         {
-            _console.WriteLine($"│  ⚠️  {warning}");
+            _console.WriteLine($"│  !  {warning}");
         }
 
         foreach (var segment in today.Segments)
@@ -148,9 +163,9 @@ public sealed class ForecastRenderer : IForecastRenderer
             }
 
             var temp = ColouriseValue(segment.TemperatureAverage, units.Temperature, colourEnabled);
-            _console.WriteLine($"│   🌡️  {temp}");
-            _console.WriteLine($"│   💧 {FormatValue(segment.PrecipitationSum)}{units.Precipitation}");
-            _console.WriteLine($"│   💨 {FormatValue(segment.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(segment.WindGustsMax)}{units.WindGusts})");
+            _console.WriteLine($"│   Temp: {temp}");
+            _console.WriteLine($"│   Rain: {FormatValue(segment.PrecipitationSum)}{units.Precipitation}");
+            _console.WriteLine($"│   Wind: {FormatValue(segment.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(segment.WindGustsMax)}{units.WindGusts})");
         }
 
         _console.WriteLine($"└──────────────────────────────────────");
@@ -223,13 +238,13 @@ public sealed class ForecastRenderer : IForecastRenderer
         var high = ColouriseValue(day.TemperatureMax, units.Temperature, colourEnabled);
         var low = ColouriseValue(day.TemperatureMin, units.Temperature, colourEnabled);
         _console.WriteLine($"│");
-        _console.WriteLine($"│  🌡️  {low} → {high}");
-        _console.WriteLine($"│  💧 {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
-        _console.WriteLine($"│  💨 {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
+        _console.WriteLine($"│  Temp: {low} -> {high}");
+        _console.WriteLine($"│  Rain: {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
+        _console.WriteLine($"│  Wind: {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
 
         if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
         {
-            _console.WriteLine($"│  ⚠️  {warning}");
+            _console.WriteLine($"│  !  {warning}");
         }
 
         _console.WriteLine($"└──────────────────────────────────────");

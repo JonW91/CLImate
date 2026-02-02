@@ -10,11 +10,12 @@ A cross-platform command-line weather forecast application built with .NET 10. G
 - 🌍 **Global location search** - Search by city, region, or address worldwide
 - 🎨 **Colourful ASCII art** - Weather conditions displayed with ANSI colours
 - 📊 **7-day forecasts** - Daily high/low temperatures, precipitation, wind speeds
-- 🕐 **Today view** - Morning/afternoon/evening splits when available
+- 🕐 **Today view** - Morning/afternoon/evening/night table with ASCII art per time period
 - ⚠️ **Weather warnings** - Integrated severe weather alerts (requires MeteoBlue API key)
 - 🌡️ **Metric/Imperial units** - Switch between measurement systems
 - 🖥️ **Cross-platform** - Works on Windows, macOS, and Linux terminals
 - 📦 **Self-contained** - No .NET runtime required (standalone binaries available)
+- 📐 **Adaptive layout** - Automatically chooses horizontal table or vertical list based on terminal width
 
 ## Quick Start
 
@@ -88,8 +89,13 @@ dotnet run --project CLImate.App -- London
 
 CLImate automatically detects your terminal size and chooses the best layout:
 
-- **Wide terminals (100+ columns)**: Displays a compact horizontal table with all 7 days side-by-side
-- **Narrow terminals**: Uses a vertical list with detailed ASCII art per day
+- **Wide terminals (140+ columns)**: Displays a compact horizontal table with ASCII art for all 7 days side-by-side
+- **Medium terminals (100-139 columns)**: Horizontal table with compact weather icons
+- **Narrow terminals (<100 columns)**: Uses a vertical list with detailed ASCII art per day
+
+The same applies to today's forecast (`-t`):
+- **Wide terminals**: Shows Morning/Afternoon/Evening/Night in a horizontal table with ASCII art
+- **Narrow terminals**: Vertical list with each time period stacked
 
 You can override this with `--horizontal` or `--vertical` flags.
 

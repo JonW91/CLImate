@@ -158,7 +158,7 @@ public sealed class CliApplication : ICliApplication
         }
         else
         {
-            _forecastRenderer.RenderDaily(forecastWithWarnings, options.ShowArt, options.UseColour);
+            _forecastRenderer.RenderDaily(forecastWithWarnings, options.ShowArt, options.UseColour, options.Layout);
         }
 
         return 0;

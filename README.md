@@ -78,9 +78,20 @@ dotnet run --project CLImate.App -- London
 | `--units <metric\|imperial>` | `-u` | Set temperature/wind units (default: metric) |
 | `--country <code>` | `-c` | Filter by 2-letter country code (e.g., GB, US) |
 | `--today` | `-t` | Show today's forecast with time segments |
+| `--horizontal` | `-H` | Force horizontal table layout |
+| `--vertical` | `-V` | Force vertical list layout |
 | `--no-art` | | Disable ASCII art, use text labels |
 | `--no-colour` | | Disable ANSI colour output |
 | `--colour` | | Force ANSI colours on |
+
+## Adaptive Layout
+
+CLImate automatically detects your terminal size and chooses the best layout:
+
+- **Wide terminals (100+ columns)**: Displays a compact horizontal table with all 7 days side-by-side
+- **Narrow terminals**: Uses a vertical list with detailed ASCII art per day
+
+You can override this with `--horizontal` or `--vertical` flags.
 
 ## Usage Examples
 

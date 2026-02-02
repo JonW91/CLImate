@@ -77,6 +77,18 @@ public sealed class CliOptionsParser : ICliOptionsParser
                 continue;
             }
 
+            if (arg is "--horizontal" or "-H")
+            {
+                options.Layout = LayoutMode.Horizontal;
+                continue;
+            }
+
+            if (arg is "--vertical" or "-V")
+            {
+                options.Layout = LayoutMode.Vertical;
+                continue;
+            }
+
             if (arg.StartsWith("--units=", StringComparison.OrdinalIgnoreCase))
             {
                 options.Units = ParseUnits(arg.Substring("--units=".Length));

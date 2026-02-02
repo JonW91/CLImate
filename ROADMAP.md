@@ -140,6 +140,22 @@ docker run --rm ghcr.io/jonw91/climate London
 
 ## Phase 3: User Experience (Priority: Medium)
 
+### 3.0 Adaptive Terminal Layout ✅
+Automatically adjusts output based on terminal dimensions:
+
+- [x] Detect terminal width/height at runtime
+- [x] Horizontal table layout for wide terminals (100+ columns)
+- [x] Vertical list layout for narrow terminals
+- [x] `--horizontal` / `-H` flag to force table layout
+- [x] `--vertical` / `-V` flag to force list layout
+
+**Usage:**
+```bash
+climate London              # Auto-detect best layout
+climate -H London           # Force horizontal table
+climate -V London           # Force vertical list
+```
+
 ### 3.1 Configuration File
 Support `~/.config/climate/config.json` or `%APPDATA%\climate\config.json`:
 

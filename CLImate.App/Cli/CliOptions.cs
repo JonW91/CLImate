@@ -2,6 +2,13 @@ using CLImate.App.Models;
 
 namespace CLImate.App.Cli;
 
+public enum LayoutMode
+{
+    Auto,
+    Horizontal,
+    Vertical
+}
+
 public sealed class CliOptions
 {
     public Units Units { get; set; } = Units.Metric;
@@ -11,4 +18,5 @@ public sealed class CliOptions
     public string? LocationInput { get; set; }
     public bool ShowHelp { get; set; }
     public bool TodayOnly { get; set; }
+    public LayoutMode Layout { get; set; } = LayoutMode.Auto;
 }

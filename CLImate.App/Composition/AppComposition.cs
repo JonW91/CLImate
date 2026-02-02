@@ -32,6 +32,7 @@ public static class AppComposition
         });
 
         services.AddSingleton<IConsoleIO, ConsoleIO>();
+        services.AddSingleton<ITerminalInfo, TerminalInfo>();
         services.AddSingleton<ICliHelp, CliHelp>();
         services.AddSingleton<ICliOptionsParser, CliOptionsParser>();
         services.AddSingleton<ICountryCodeCatalogue, CountryCodeCatalogue>();
@@ -49,6 +50,7 @@ public static class AppComposition
         services.AddSingleton<IArtColouriser, ArtColouriser>();
         services.AddSingleton<ITemperatureColourScale, TemperatureColourScale>();
         services.AddSingleton<IWeatherCodeCatalogue, WeatherCodeCatalogue>();
+        services.AddSingleton<ITableRenderer, TableRenderer>();
         services.AddSingleton<IForecastRenderer, ForecastRenderer>();
         services.AddSingleton<ICliApplication, CliApplication>();
 

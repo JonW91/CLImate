@@ -5,7 +5,7 @@ namespace CLImate.App.Rendering;
 
 public interface IForecastRenderer
 {
-    void RenderDaily(Forecast forecast, bool showArt, bool useColour);
+    void RenderDaily(Forecast forecast, bool showArt, bool useColour, LayoutMode layout = LayoutMode.Auto);
     void RenderToday(Forecast forecast, bool showArt, bool useColour);
 }
 
@@ -17,6 +17,8 @@ public sealed class ForecastRenderer : IForecastRenderer
     private readonly IAnsiColouriser _colouriser;
     private readonly ITemperatureColourScale _temperatureColours;
     private readonly IArtColouriser _artColouriser;
+    private readonly ITerminalInfo _terminalInfo;
+    private readonly ITableRenderer _tableRenderer;
 
     public ForecastRenderer(
         IConsoleIO console,
@@ -24,7 +26,9 @@ public sealed class ForecastRenderer : IForecastRenderer
         IWeatherCodeCatalogue weatherCodes,
         IAnsiColouriser colouriser,
         ITemperatureColourScale temperatureColours,
-        IArtColouriser artColouriser)
+        IArtColouriser artColouriser,
+        ITerminalInfo terminalInfo,
+        ITableRenderer tableRenderer)
     {
         _console = console;
         _asciiArt = asciiArt;
@@ -32,9 +36,29 @@ public sealed class ForecastRenderer : IForecastRenderer
         _colouriser = colouriser;
         _temperatureColours = temperatureColours;
         _artColouriser = artColouriser;
+        _terminalInfo = terminalInfo;
+        _tableRenderer = tableRenderer;
     }
 
-    public void RenderDaily(Forecast forecast, bool showArt, bool useColour)
+    public void RenderDaily(Forecast forecast, bool showArt, bool useColour, LayoutMode layout = LayoutMode.Auto)
+    {
+        var useHorizontal = layout switch
+        {
+            LayoutMode.Horizontal => true,
+            LayoutMode.Vertical => false,
+            _ => _tableRenderer.CanRenderHorizontally(forecast, _terminalInfo.Width)
+        };
+
+        if (useHorizontal)
+        {
+            _tableRenderer.RenderHorizontalTable(forecast, showArt, useColour);
+            return;
+        }
+
+        RenderDailyVertical(forecast, showArt, useColour);
+    }
+
+    private void RenderDailyVertical(Forecast forecast, bool showArt, bool useColour)
     {
         var units = forecast.Units;
         var colourEnabled = _colouriser.ShouldUseColour(useColour);

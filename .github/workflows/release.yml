@@ -103,6 +103,7 @@ jobs:
             dist/*.deb
             dist/*.sha256
           draft: true
+          fail_on_unmatched_files: false
 
   nuget:
     runs-on: ubuntu-latest

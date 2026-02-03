@@ -8,8 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -49,26 +47,24 @@ jobs:
             exit 1
           fi
 
+          mkdir -p release-assets
           if [[ "$EXT" == "zip" ]]; then
-            (cd dist/$RID && zip -qr "../climate-${ASSET_OS}-${RID#*-}.zip" "$BIN_NAME" Assets/)
+            (cd dist/$RID && zip -qr "../../release-assets/climate-${ASSET_OS}-${RID#*-}.zip" "$BIN_NAME" Assets/)
           else
-            (cd dist/$RID && tar -czf "../climate-${ASSET_OS}-${RID#*-}.tar.gz" "$BIN_NAME" Assets/)
+            (cd dist/$RID && tar -czf "../../release-assets/climate-${ASSET_OS}-${RID#*-}.tar.gz" "$BIN_NAME" Assets/)
           fi
 
-          # Generate checksum for this platform's package
-          cd dist
+          # Generate checksum
+          cd release-assets
           sha256sum climate-${ASSET_OS}-${RID#*-}.* > climate-${ASSET_OS}-${RID#*-}.sha256
 
       - name: Build DEB package (Linux x64 only)
         if: matrix.rid == 'linux-x64'
         run: |
-          set -f  # Disable globbing
+          set -f
           VERSION="${GITHUB_REF_NAME#v}"
-          # For Debian, replace hyphen with tilde for pre-release versions
-          # Store in variable without tilde expansion
           PKG_VERSION=$(echo "$VERSION" | sed 's/-beta/~beta/')
           PKG_DIR="climate_${PKG_VERSION}_amd64"
-          # Escape tilde in directory name to prevent expansion
           PKG_DIR=$(printf '%s' "$PKG_DIR")
 
           mkdir -p "$PKG_DIR/DEBIAN"
@@ -93,17 +89,34 @@ jobs:
           } > "$PKG_DIR/DEBIAN/control"
 
           dpkg-deb --build "$PKG_DIR"
-          mv "$PKG_DIR.deb" dist/
+          mv "$PKG_DIR.deb" release-assets/
 
-      - name: Upload assets
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.rid }}
+          path: release-assets/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+
+      - name: List assets
+        run: ls -la assets/
+
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            dist/climate-*
-            dist/*.deb
-            dist/*.sha256
+          files: assets/*
           draft: true
-          fail_on_unmatched_files: false
 
   nuget:
     runs-on: ubuntu-latest

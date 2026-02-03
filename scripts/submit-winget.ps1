@@ -11,8 +11,8 @@ Write-Host "=== CLImate WinGet Submission Helper ===" -ForegroundColor Cyan
 
 # 1. Download the release and compute hash
 Write-Host "`n1. Downloading Windows release..." -ForegroundColor Yellow
-$zipPath = "$env:TEMP\climate-windows-x64.zip"
-$releaseUrl = "https://github.com/JonW91/CLImate/releases/download/v$Version/climate-windows-x64.zip"
+$zipPath = "$env:TEMP\climate-win-x64.zip"
+$releaseUrl = "https://github.com/JonW91/CLImate/releases/download/v$Version/climate-win-x64.zip"
 
 try {
     Invoke-WebRequest -Uri $releaseUrl -OutFile $zipPath -UseBasicParsing
@@ -96,7 +96,7 @@ NestedInstallerFiles:
     PortableCommandAlias: climate
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/JonW91/CLImate/releases/download/v$Version/climate-windows-x64.zip
+    InstallerUrl: https://github.com/JonW91/CLImate/releases/download/v$Version/climate-win-x64.zip
     InstallerSha256: $hash
 ManifestType: installer
 ManifestVersion: 1.6.0

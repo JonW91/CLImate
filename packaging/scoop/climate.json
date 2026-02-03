@@ -6,8 +6,8 @@
     "license": "MIT",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/JonW91/CLImate/releases/download/v0.1.0-beta/climate-windows-x64.zip",
-            "hash": "PLACEHOLDER_SHA256_WINDOWS_X64"
+            "url": "https://github.com/JonW91/CLImate/releases/download/v0.1.0-beta/climate-win-x64.zip",
+            "hash": "453357f978c9970987aebc80bae31124871c18ed09026a6687b98b6407c048a4"
         }
     },
     "bin": "climate.exe",
@@ -17,7 +17,7 @@
     "autoupdate": {
         "architecture": {
             "64bit": {
-                "url": "https://github.com/JonW91/CLImate/releases/download/v$version/climate-windows-x64.zip"
+                "url": "https://github.com/JonW91/CLImate/releases/download/v$version/climate-win-x64.zip"
             }
         }
     },

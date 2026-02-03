@@ -18,8 +18,8 @@ if (-not $ApiKey) {
 
 # 1. Download the release and compute hash
 Write-Host "`n1. Downloading Windows release..." -ForegroundColor Yellow
-$zipPath = "$env:TEMP\climate-windows-x64.zip"
-$releaseUrl = "https://github.com/JonW91/CLImate/releases/download/v$Version/climate-windows-x64.zip"
+$zipPath = "$env:TEMP\climate-win-x64.zip"
+$releaseUrl = "https://github.com/JonW91/CLImate/releases/download/v$Version/climate-win-x64.zip"
 
 Invoke-WebRequest -Uri $releaseUrl -OutFile $zipPath -UseBasicParsing
 $hash = (Get-FileHash $zipPath -Algorithm SHA256).Hash

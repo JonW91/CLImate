@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $packageName = 'climate'
 $toolsDir = "$(Split-Path -Parent $MyInvocation.MyCommand.Definition)"
 
-$url64 = 'https://github.com/JonW91/CLImate/releases/download/v0.1.0-beta/climate-windows-x64.zip'
+$url64 = 'https://github.com/JonW91/CLImate/releases/download/v0.1.0-beta/climate-win-x64.zip'
 $checksum64 = 'PLACEHOLDER_SHA256_WINDOWS_X64'
 
 $packageArgs = @{

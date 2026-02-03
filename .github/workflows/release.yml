@@ -55,6 +55,10 @@ jobs:
             (cd dist/$RID && tar -czf "../climate-${ASSET_OS}-${RID#*-}.tar.gz" "$BIN_NAME" Assets/)
           fi
 
+          # Generate checksum for this platform's package
+          cd dist
+          sha256sum climate-${ASSET_OS}-${RID#*-}.* > climate-${ASSET_OS}-${RID#*-}.sha256
+
       - name: Build DEB package (Linux x64 only)
         if: matrix.rid == 'linux-x64'
         run: |
@@ -97,30 +101,7 @@ jobs:
           files: |
             dist/climate-*
             dist/*.deb
-          draft: true
-
-  checksums:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Download release assets
-        uses: robinraju/release-downloader@v1
-        with:
-          tag: ${{ github.ref_name }}
-          fileName: "*"
-          out-file-path: assets
-
-      - name: Generate checksums
-        run: |
-          cd assets
-          sha256sum climate-* *.deb 2>/dev/null | tee SHA256SUMS.txt
-
-      - name: Upload checksums
-        uses: softprops/action-gh-release@v2
-        with:
-          files: assets/SHA256SUMS.txt
+            dist/*.sha256
           draft: true
 
   nuget:

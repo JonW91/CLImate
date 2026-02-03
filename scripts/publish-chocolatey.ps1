@@ -83,7 +83,7 @@ Usage:
 `$packageName = 'climate'
 `$toolsDir = "`$(Split-Path -Parent `$MyInvocation.MyCommand.Definition)"
 
-`$url64 = 'https://github.com/JonW91/CLImate/releases/download/v$Version/climate-windows-x64.zip'
+`$url64 = 'https://github.com/JonW91/CLImate/releases/download/v$Version/climate-win-x64.zip'
 `$checksum64 = '$hash'
 
 `$packageArgs = @{

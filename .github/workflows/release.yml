@@ -124,6 +124,96 @@ jobs:
           files: assets/*
           prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
 
+  chocolatey:
+    needs: release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Download Windows release
+        shell: pwsh
+        run: |
+          $url = "https://github.com/JonW91/CLImate/releases/download/${{ github.ref_name }}/climate-win-x64.zip"
+          Invoke-WebRequest -Uri $url -OutFile climate-win-x64.zip -UseBasicParsing
+          $hash = (Get-FileHash climate-win-x64.zip -Algorithm SHA256).Hash
+          echo "HASH=$hash" >> $env:GITHUB_OUTPUT
+        id: download
+
+      - name: Create Chocolatey package
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.VERSION }}"
+          $hash = "${{ steps.download.outputs.HASH }}"
+
+          New-Item -ItemType Directory -Path "choco/tools" -Force | Out-Null
+
+          # Create nuspec
+          @"
+          <?xml version="1.0" encoding="utf-8"?>
+          <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+            <metadata>
+              <id>climate</id>
+              <version>$version</version>
+              <title>CLImate - Terminal Weather Forecast</title>
+              <authors>JonW91</authors>
+              <owners>JonW91</owners>
+              <projectUrl>https://github.com/JonW91/CLImate</projectUrl>
+              <licenseUrl>https://github.com/JonW91/CLImate/blob/main/LICENSE</licenseUrl>
+              <requireLicenseAcceptance>false</requireLicenseAcceptance>
+              <projectSourceUrl>https://github.com/JonW91/CLImate</projectSourceUrl>
+              <docsUrl>https://github.com/JonW91/CLImate#readme</docsUrl>
+              <bugTrackerUrl>https://github.com/JonW91/CLImate/issues</bugTrackerUrl>
+              <tags>weather forecast cli terminal ascii-art dotnet cross-platform</tags>
+              <summary>Cross-platform CLI weather forecast with beautiful ASCII art</summary>
+              <description>CLImate is a cross-platform command-line weather forecast application built with .NET. Features global location search, colorful ASCII art weather displays, 7-day forecasts, today view, and hourly forecasts.</description>
+              <releaseNotes>https://github.com/JonW91/CLImate/releases/tag/${{ github.ref_name }}</releaseNotes>
+            </metadata>
+            <files>
+              <file src="tools\**" target="tools" />
+            </files>
+          </package>
+          "@ | Set-Content "choco/climate.nuspec" -Encoding UTF8
+
+          # Create install script
+          @"
+          `$ErrorActionPreference = 'Stop'
+          `$packageName = 'climate'
+          `$toolsDir = "`$(Split-Path -Parent `$MyInvocation.MyCommand.Definition)"
+          `$url64 = 'https://github.com/JonW91/CLImate/releases/download/${{ github.ref_name }}/climate-win-x64.zip'
+          `$checksum64 = '$hash'
+          `$packageArgs = @{
+              packageName    = `$packageName
+              unzipLocation  = `$toolsDir
+              url64bit       = `$url64
+              checksum64     = `$checksum64
+              checksumType64 = 'sha256'
+          }
+          Install-ChocolateyZipPackage @packageArgs
+          `$climatePath = Join-Path `$toolsDir 'climate.exe'
+          Install-BinFile -Name 'climate' -Path `$climatePath
+          "@ | Set-Content "choco/tools/chocolateyinstall.ps1" -Encoding UTF8
+
+          # Create uninstall script
+          @"
+          `$ErrorActionPreference = 'Stop'
+          Uninstall-BinFile -Name 'climate'
+          "@ | Set-Content "choco/tools/chocolateyuninstall.ps1" -Encoding UTF8
+
+      - name: Pack and push to Chocolatey
+        shell: pwsh
+        run: |
+          cd choco
+          choco pack climate.nuspec
+          $nupkg = Get-ChildItem "*.nupkg" | Select-Object -First 1
+          choco push $nupkg.Name --source https://push.chocolatey.org/ --api-key ${{ secrets.CHOCOLATEY_API_KEY }}
+
   nuget:
     runs-on: ubuntu-latest
     steps:

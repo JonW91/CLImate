@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.singleton.1.6.0.schema.json
 PackageIdentifier: JonW91.CLImate
-PackageVersion: 0.1.0-beta
+PackageVersion: 0.1.2
 PackageLocale: en-US
 Publisher: JonW91
 PublisherUrl: https://github.com/JonW91
@@ -24,12 +24,12 @@ Tags:
   - ascii-art
   - dotnet
   - cross-platform
-ReleaseNotesUrl: https://github.com/JonW91/CLImate/releases/tag/v0.1.0-beta
+ReleaseNotesUrl: https://github.com/JonW91/CLImate/releases/tag/v0.1.2
 Installers:
   - Architecture: x64
     InstallerType: zip
-    InstallerUrl: https://github.com/JonW91/CLImate/releases/download/v0.1.0-beta/climate-win-x64.zip
-    InstallerSha256: PLACEHOLDER_SHA256_WINDOWS_X64
+    InstallerUrl: https://github.com/JonW91/CLImate/releases/download/v0.1.2/climate-win-x64.zip
+    InstallerSha256: 1033fb1b2bbaf18fe02820081736b6c60742a289cf35470ffe61d8b51511435e
     NestedInstallerType: portable
     NestedInstallerFiles:
       - RelativeFilePath: climate.exe

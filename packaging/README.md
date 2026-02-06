@@ -62,7 +62,7 @@ To publish to Chocolatey:
 To submit to WinGet:
 
 1. Fork [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs)
-2. Copy manifest to `manifests/j/JonW91/CLImate/0.1.0-beta/`
+2. Copy manifest to `manifests/j/JonW91/CLImate/<version>/`
 3. Update SHA256 hash
 4. Submit pull request
 

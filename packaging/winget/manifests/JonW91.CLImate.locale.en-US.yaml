@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
 PackageIdentifier: JonW91.CLImate
-PackageVersion: 0.1.0-beta
+PackageVersion: 0.1.2
 PackageLocale: en-US
 Publisher: JonW91
 PublisherUrl: https://github.com/JonW91
@@ -24,6 +24,6 @@ Tags:
   - ascii-art
   - dotnet
   - cross-platform
-ReleaseNotesUrl: https://github.com/JonW91/CLImate/releases/tag/v0.1.0-beta
+ReleaseNotesUrl: https://github.com/JonW91/CLImate/releases/tag/v0.1.2
 ManifestType: defaultLocale
 ManifestVersion: 1.6.0

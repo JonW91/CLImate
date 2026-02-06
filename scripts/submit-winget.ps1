@@ -2,7 +2,7 @@
 # Run this script to prepare and submit CLImate to WinGet
 
 param(
-    [string]$Version = "0.1.0-beta"
+    [string]$Version = "0.1.2"
 )
 
 $ErrorActionPreference = "Stop"

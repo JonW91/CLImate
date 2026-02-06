@@ -79,9 +79,9 @@ Expand-Archive climate-windows-x64.zip -DestinationPath $env:LOCALAPPDATA\CLImat
 $env:PATH += ";$env:LOCALAPPDATA\CLImate"
 ```
 
-### Option 3: Package Managers (Coming Soon)
+### Option 3: Package Managers
 
-We're working on getting CLImate into popular package managers:
+Install CLImate via these package managers:
 
 <details>
 <summary><strong>🍺 Homebrew (macOS/Linux)</strong> - Available</summary>
@@ -90,8 +90,6 @@ We're working on getting CLImate into popular package managers:
 brew tap jonw91/climate
 brew install climate
 ```
-
-> **Note:** SHA256 hashes need to be updated after each release. See [homebrew-climate](https://github.com/JonW91/homebrew-climate).
 </details>
 
 <details>
@@ -101,38 +99,34 @@ brew install climate
 scoop bucket add climate https://github.com/JonW91/scoop-climate
 scoop install climate
 ```
-
-> **Note:** SHA256 hash needs to be updated after each release. See [scoop-climate](https://github.com/JonW91/scoop-climate).
 </details>
 
 <details>
-<summary><strong>🍫 Chocolatey (Windows)</strong> - Planned</summary>
+<summary><strong>🍫 Chocolatey (Windows)</strong> - In Review</summary>
 
 ```powershell
-# Coming soon!
 choco install climate
 ```
+
+> Awaiting approval from the Chocolatey community repository.
 </details>
 
 <details>
-<summary><strong>📦 WinGet (Windows)</strong> - Planned</summary>
+<summary><strong>📦 WinGet (Windows)</strong> - In Review</summary>
 
 ```powershell
-# Coming soon!
 winget install JonW91.CLImate
 ```
+
+> PR submitted to winget-pkgs, awaiting review.
 </details>
 
 <details>
-<summary><strong>🎩 DNF/RPM (Fedora/RHEL/CentOS)</strong> - Planned</summary>
+<summary><strong>🎩 DNF/RPM (Fedora/RHEL/CentOS)</strong> - Available</summary>
 
 ```bash
-# Coming soon via COPR!
-sudo dnf copr enable jonw91/climate
-sudo dnf install climate
-
-# Or install directly from release:
-curl -fsSL https://github.com/JonW91/CLImate/releases/latest/download/climate_0.1.0~beta_amd64.deb -o climate.deb
+# Download and install RPM package directly:
+curl -fsSL https://github.com/JonW91/CLImate/releases/latest/download/climate-0.1.0~beta-1.x86_64.rpm -o climate.rpm
 sudo dnf install ./climate.rpm
 ```
 </details>
@@ -145,7 +139,6 @@ sudo dnf install ./climate.rpm
 curl -fsSL https://github.com/JonW91/CLImate/releases/latest/download/climate_0.1.0~beta_amd64.deb -o climate.deb
 sudo dpkg -i climate.deb
 ```
-</details>
 </details>
 
 ### Option 4: .NET Global Tool

@@ -89,17 +89,19 @@ curl -fsSL https://raw.githubusercontent.com/JonW91/CLImate/main/scripts/install
 irm https://raw.githubusercontent.com/JonW91/CLImate/main/scripts/install.ps1 | iex
 ```
 
-### 2.2 Package Managers (Planned)
+### 2.2 Package Managers
 
 | Package Manager | Platform | Status | Notes |
 |----------------|----------|--------|-------|
-| **Homebrew** | macOS/Linux | 🔲 Planned | Create tap: `brew install jonw91/tap/climate` |
-| **Chocolatey** | Windows | 🔲 Planned | `choco install climate` |
-| **Scoop** | Windows | 🔲 Planned | Add to extras bucket |
-| **APT/Debian** | Linux | 🔲 Future | Requires .deb packaging |
+| **NuGet (.NET Tool)** | Cross-platform | 🔲 Ready | Automated in release workflow (requires `NUGET_API_KEY`) |
+| **Chocolatey** | Windows | 🔄 In Review | Submitted to community repository |
+| **Winget** | Windows | 🔄 In Review | PR submitted to winget-pkgs |
+| **Scoop** | Windows | ✅ Available | `scoop bucket add climate https://github.com/JonW91/scoop-climate` |
+| **Homebrew** | macOS/Linux | ⚠️ Issues | Tap exists but installation failing - needs debugging |
+| **APT/Debian** | Linux | 🔲 Ready | `.deb` package scripts in `packaging/deb/` |
+| **DNF/RPM** | Fedora/RHEL | 🔲 Ready | `.rpm` spec in `packaging/rpm/` |
 | **AUR** | Arch Linux | 🔲 Future | Community maintained |
 | **Snap** | Linux | 🔲 Future | Universal Linux package |
-| **Winget** | Windows | 🔲 Future | Microsoft Store compatible |
 
 ### 2.3 .NET Global Tool ✅
 ```bash
@@ -108,7 +110,7 @@ dotnet tool install --global CLImate
 **Status: Configured** - Added to CLImate.App.csproj
 - [x] Add `<PackAsTool>true</PackAsTool>` to csproj
 - [x] Configure NuGet package metadata
-- [ ] Publish to NuGet.org
+- [ ] Publish to NuGet.org (automated in release workflow; requires `NUGET_API_KEY`)
 
 ```xml
 <!-- Already added to CLImate.App.csproj -->

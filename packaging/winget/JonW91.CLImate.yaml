@@ -28,7 +28,7 @@ ReleaseNotesUrl: https://github.com/JonW91/CLImate/releases/tag/v0.1.0-beta
 Installers:
   - Architecture: x64
     InstallerType: zip
-    InstallerUrl: https://github.com/JonW91/CLImate/releases/download/v0.1.0-beta/climate-windows-x64.zip
+    InstallerUrl: https://github.com/JonW91/CLImate/releases/download/v0.1.0-beta/climate-win-x64.zip
     InstallerSha256: PLACEHOLDER_SHA256_WINDOWS_X64
     NestedInstallerType: portable
     NestedInstallerFiles:

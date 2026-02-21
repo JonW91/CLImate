@@ -138,7 +138,7 @@ public sealed class WeatherWarningsServiceTests
     }
 
     [Fact]
-    public async Task GetDailyWarningsAsync_NonUsCountry_ReturnsRegionalUnavailableMessage()
+    public async Task GetDailyWarningsAsync_NonCoveredCountry_ReturnsRegionalUnavailableMessage()
     {
         var nws = A.Fake<INwsWarningsClient>();
         var meteo = A.Fake<IMeteoalarmWarningsClient>();
@@ -148,7 +148,7 @@ public sealed class WeatherWarningsServiceTests
         var service = new WeatherWarningsService(nws, meteo);
         var dates = new List<string> { "2026-02-01" };
 
-        var result = await service.GetDailyWarningsAsync(51.5, -0.1, "GB", dates, CancellationToken.None);
+        var result = await service.GetDailyWarningsAsync(51.5, -0.1, "IN", dates, CancellationToken.None);
 
         Assert.Equal("no warnings available for this region", result["2026-02-01"]);
     }

@@ -9,11 +9,12 @@ public sealed class WeatherWarningsServiceTests
     [Fact]
     public async Task GetDailyWarningsAsync_NoWarnings_ReturnsNoneForAllDates()
     {
-        var client = A.Fake<INwsWarningsClient>();
-        A.CallTo(() => client.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
+        var nws = A.Fake<INwsWarningsClient>();
+        var meteo = A.Fake<IMeteoalarmWarningsClient>();
+        A.CallTo(() => nws.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
             .Returns(Task.FromResult<IReadOnlyList<WeatherWarning>>(Array.Empty<WeatherWarning>()));
 
-        var service = new WeatherWarningsService(client);
+        var service = new WeatherWarningsService(nws, meteo);
         var dates = new List<string> { "2026-02-01", "2026-02-02", "2026-02-03" };
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "US", dates, CancellationToken.None);
@@ -27,15 +28,16 @@ public sealed class WeatherWarningsServiceTests
     [Fact]
     public async Task GetDailyWarningsAsync_SingleDayWarning_AssignsSummaryToMatchingDate()
     {
-        var client = A.Fake<INwsWarningsClient>();
+        var nws = A.Fake<INwsWarningsClient>();
+        var meteo = A.Fake<IMeteoalarmWarningsClient>();
         var warnings = new List<WeatherWarning>
         {
             new WeatherWarning("Heavy rain", DateTimeOffset.Parse("2026-02-02T00:00:00Z"), DateTimeOffset.Parse("2026-02-02T23:59:59Z"))
         };
-        A.CallTo(() => client.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
+        A.CallTo(() => nws.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
             .Returns(Task.FromResult<IReadOnlyList<WeatherWarning>>(warnings));
 
-        var service = new WeatherWarningsService(client);
+        var service = new WeatherWarningsService(nws, meteo);
         var dates = new List<string> { "2026-02-01", "2026-02-02", "2026-02-03" };
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "US", dates, CancellationToken.None);
@@ -48,15 +50,16 @@ public sealed class WeatherWarningsServiceTests
     [Fact]
     public async Task GetDailyWarningsAsync_MultiDayWarning_SpansDatesCorrectly()
     {
-        var client = A.Fake<INwsWarningsClient>();
+        var nws = A.Fake<INwsWarningsClient>();
+        var meteo = A.Fake<IMeteoalarmWarningsClient>();
         var warnings = new List<WeatherWarning>
         {
             new WeatherWarning("Storm", DateTimeOffset.Parse("2026-02-02T00:00:00Z"), DateTimeOffset.Parse("2026-02-04T00:00:00Z"))
         };
-        A.CallTo(() => client.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
+        A.CallTo(() => nws.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
             .Returns(Task.FromResult<IReadOnlyList<WeatherWarning>>(warnings));
 
-        var service = new WeatherWarningsService(client);
+        var service = new WeatherWarningsService(nws, meteo);
         var dates = new List<string> { "2026-02-01", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05" };
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "US", dates, CancellationToken.None);
@@ -71,16 +74,17 @@ public sealed class WeatherWarningsServiceTests
     [Fact]
     public async Task GetDailyWarningsAsync_MultipleWarningsOnSameDay_CombinesSummaries()
     {
-        var client = A.Fake<INwsWarningsClient>();
+        var nws = A.Fake<INwsWarningsClient>();
+        var meteo = A.Fake<IMeteoalarmWarningsClient>();
         var warnings = new List<WeatherWarning>
         {
             new WeatherWarning("Heavy rain", DateTimeOffset.Parse("2026-02-02T00:00:00Z"), DateTimeOffset.Parse("2026-02-02T23:59:59Z")),
             new WeatherWarning("Strong winds", DateTimeOffset.Parse("2026-02-02T00:00:00Z"), DateTimeOffset.Parse("2026-02-02T23:59:59Z"))
         };
-        A.CallTo(() => client.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
+        A.CallTo(() => nws.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
             .Returns(Task.FromResult<IReadOnlyList<WeatherWarning>>(warnings));
 
-        var service = new WeatherWarningsService(client);
+        var service = new WeatherWarningsService(nws, meteo);
         var dates = new List<string> { "2026-02-01", "2026-02-02", "2026-02-03" };
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "US", dates, CancellationToken.None);
@@ -93,15 +97,16 @@ public sealed class WeatherWarningsServiceTests
     [Fact]
     public async Task GetDailyWarningsAsync_WarningWithNullStart_IsIgnored()
     {
-        var client = A.Fake<INwsWarningsClient>();
+        var nws = A.Fake<INwsWarningsClient>();
+        var meteo = A.Fake<IMeteoalarmWarningsClient>();
         var warnings = new List<WeatherWarning>
         {
             new WeatherWarning("Unknown event", null, null)
         };
-        A.CallTo(() => client.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
+        A.CallTo(() => nws.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
             .Returns(Task.FromResult<IReadOnlyList<WeatherWarning>>(warnings));
 
-        var service = new WeatherWarningsService(client);
+        var service = new WeatherWarningsService(nws, meteo);
         var dates = new List<string> { "2026-02-01", "2026-02-02" };
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "US", dates, CancellationToken.None);
@@ -113,15 +118,16 @@ public sealed class WeatherWarningsServiceTests
     [Fact]
     public async Task GetDailyWarningsAsync_WarningStartsOnlyNoEnd_UsesStartDateOnly()
     {
-        var client = A.Fake<INwsWarningsClient>();
+        var nws = A.Fake<INwsWarningsClient>();
+        var meteo = A.Fake<IMeteoalarmWarningsClient>();
         var warnings = new List<WeatherWarning>
         {
             new WeatherWarning("Flash event", DateTimeOffset.Parse("2026-02-02T12:00:00Z"), null)
         };
-        A.CallTo(() => client.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
+        A.CallTo(() => nws.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
             .Returns(Task.FromResult<IReadOnlyList<WeatherWarning>>(warnings));
 
-        var service = new WeatherWarningsService(client);
+        var service = new WeatherWarningsService(nws, meteo);
         var dates = new List<string> { "2026-02-01", "2026-02-02", "2026-02-03" };
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "US", dates, CancellationToken.None);
@@ -134,15 +140,36 @@ public sealed class WeatherWarningsServiceTests
     [Fact]
     public async Task GetDailyWarningsAsync_NonUsCountry_ReturnsRegionalUnavailableMessage()
     {
-        var client = A.Fake<INwsWarningsClient>();
-        A.CallTo(() => client.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
+        var nws = A.Fake<INwsWarningsClient>();
+        var meteo = A.Fake<IMeteoalarmWarningsClient>();
+        A.CallTo(() => nws.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
             .Returns(Task.FromResult<IReadOnlyList<WeatherWarning>>(Array.Empty<WeatherWarning>()));
 
-        var service = new WeatherWarningsService(client);
+        var service = new WeatherWarningsService(nws, meteo);
         var dates = new List<string> { "2026-02-01" };
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "GB", dates, CancellationToken.None);
 
         Assert.Equal("no warnings available for this region", result["2026-02-01"]);
+    }
+
+    [Fact]
+    public async Task GetDailyWarningsAsync_EuCountry_UsesMeteoalarm()
+    {
+        var nws = A.Fake<INwsWarningsClient>();
+        var meteo = A.Fake<IMeteoalarmWarningsClient>();
+        var warnings = new List<WeatherWarning>
+        {
+            new WeatherWarning("EU alert", DateTimeOffset.Parse("2026-02-02T00:00:00Z"), DateTimeOffset.Parse("2026-02-02T23:59:59Z"))
+        };
+        A.CallTo(() => meteo.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
+            .Returns(Task.FromResult<IReadOnlyList<WeatherWarning>>(warnings));
+
+        var service = new WeatherWarningsService(nws, meteo);
+        var dates = new List<string> { "2026-02-02" };
+
+        var result = await service.GetDailyWarningsAsync(51.5, -0.1, "DE", dates, CancellationToken.None);
+
+        Assert.Equal("EU alert", result["2026-02-02"]);
     }
 }

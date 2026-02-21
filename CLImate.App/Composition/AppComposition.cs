@@ -44,6 +44,7 @@ public static class AppComposition
         services.AddSingleton<IGeocodingService, GeocodingService>();
         services.AddSingleton<IForecastService, ForecastService>();
         services.AddSingleton<INwsWarningsClient, NwsWarningsClient>();
+        services.AddSingleton<IMeteoalarmWarningsClient, MeteoalarmWarningsClient>();
         services.AddSingleton<IWeatherWarningsService, WeatherWarningsService>();
         services.AddSingleton<IAsciiArtCatalogue, AsciiArtCatalogue>();
         services.AddSingleton<IAnsiColouriser, AnsiColouriser>();

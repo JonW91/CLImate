@@ -16,10 +16,12 @@ public interface IWeatherWarningsService
 public sealed class WeatherWarningsService : IWeatherWarningsService
 {
     private readonly INwsWarningsClient _nwsClient;
+    private readonly IMeteoalarmWarningsClient _meteoalarmClient;
 
-    public WeatherWarningsService(INwsWarningsClient nwsClient)
+    public WeatherWarningsService(INwsWarningsClient nwsClient, IMeteoalarmWarningsClient meteoalarmClient)
     {
         _nwsClient = nwsClient;
+        _meteoalarmClient = meteoalarmClient;
     }
 
     public async Task<IReadOnlyDictionary<string, string>> GetDailyWarningsAsync(
@@ -31,16 +33,33 @@ public sealed class WeatherWarningsService : IWeatherWarningsService
     {
         var output = dates.ToDictionary(d => d, _ => "none");
 
-        if (!string.Equals(countryCode, "US", StringComparison.OrdinalIgnoreCase))
+        if (IsEuCountry(countryCode))
         {
-            foreach (var date in dates)
-            {
-                output[date] = "no warnings available for this region";
-            }
-            return output;
+            return await PopulateWarningsAsync(
+                output,
+                () => _meteoalarmClient.GetWarningsAsync(latitude, longitude, cancellationToken));
         }
 
-        var warnings = await _nwsClient.GetWarningsAsync(latitude, longitude, cancellationToken);
+        if (string.Equals(countryCode, "US", StringComparison.OrdinalIgnoreCase))
+        {
+            return await PopulateWarningsAsync(
+                output,
+                () => _nwsClient.GetWarningsAsync(latitude, longitude, cancellationToken));
+        }
+
+        foreach (var date in dates)
+        {
+            output[date] = "no warnings available for this region";
+        }
+
+        return output;
+    }
+
+    private static async Task<IReadOnlyDictionary<string, string>> PopulateWarningsAsync(
+        Dictionary<string, string> output,
+        Func<Task<IReadOnlyList<WeatherWarning>>> fetch)
+    {
+        var warnings = await fetch();
         if (warnings.Count == 0)
         {
             return output;
@@ -80,4 +99,21 @@ public sealed class WeatherWarningsService : IWeatherWarningsService
 
         return output;
     }
+
+    private static bool IsEuCountry(string? countryCode)
+    {
+        if (string.IsNullOrWhiteSpace(countryCode))
+        {
+            return false;
+        }
+
+        return EuCountryCodes.Contains(countryCode.Trim().ToUpperInvariant());
+    }
+
+    private static readonly HashSet<string> EuCountryCodes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // EU + EEA + UK (Meteoalarm coverage)
+        "AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK","SI","ES","SE",
+        "IS","NO","LI","GB","UK","CH"
+    };
 }

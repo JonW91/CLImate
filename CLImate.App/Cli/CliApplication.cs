@@ -154,6 +154,7 @@ public sealed class CliApplication : ICliApplication
         var warnings = await _warningsService.GetDailyWarningsAsync(
             selected.Latitude.Value,
             selected.Longitude.Value,
+            selected.CountryCode,
             warningDates,
             cancellationToken);
 

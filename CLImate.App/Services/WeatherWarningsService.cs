@@ -1,3 +1,4 @@
+using System.Linq;
 using CLImate.App.Models;
 
 namespace CLImate.App.Services;
@@ -7,32 +8,39 @@ public interface IWeatherWarningsService
     Task<IReadOnlyDictionary<string, string>> GetDailyWarningsAsync(
         double latitude,
         double longitude,
+        string? countryCode,
         IReadOnlyList<string> dates,
         CancellationToken cancellationToken);
 }
 
 public sealed class WeatherWarningsService : IWeatherWarningsService
 {
-    private readonly IMeteoBlueWarningsClient _client;
+    private readonly INwsWarningsClient _nwsClient;
 
-    public WeatherWarningsService(IMeteoBlueWarningsClient client)
+    public WeatherWarningsService(INwsWarningsClient nwsClient)
     {
-        _client = client;
+        _nwsClient = nwsClient;
     }
 
     public async Task<IReadOnlyDictionary<string, string>> GetDailyWarningsAsync(
         double latitude,
         double longitude,
+        string? countryCode,
         IReadOnlyList<string> dates,
         CancellationToken cancellationToken)
     {
-        var output = new Dictionary<string, string>();
-        foreach (var date in dates)
+        var output = dates.ToDictionary(d => d, _ => "none");
+
+        if (!string.Equals(countryCode, "US", StringComparison.OrdinalIgnoreCase))
         {
-            output[date] = "none";
+            foreach (var date in dates)
+            {
+                output[date] = "no warnings available for this region";
+            }
+            return output;
         }
 
-        var warnings = await _client.GetWarningsAsync(latitude, longitude, cancellationToken);
+        var warnings = await _nwsClient.GetWarningsAsync(latitude, longitude, cancellationToken);
         if (warnings.Count == 0)
         {
             return output;
@@ -56,7 +64,7 @@ public sealed class WeatherWarningsService : IWeatherWarningsService
                 var key = current.ToString("yyyy-MM-dd");
                 if (output.TryGetValue(key, out var existing))
                 {
-                    if (existing == "none")
+                    if (existing == "none" || existing.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
                     {
                         output[key] = summary;
                     }

@@ -137,7 +137,9 @@ public sealed class TableRenderer : ITableRenderer
         _console.WriteLine(BuildRow(wind, '│'));
 
         // Warnings row (if any)
-        var hasWarnings = days.Any(d => forecast.WarningsByDate.ContainsKey(d.Date));
+        var hasWarnings = days.Any(d =>
+            forecast.WarningsByDate.TryGetValue(d.Date, out var warning)
+            && !string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase));
         if (hasWarnings)
         {
             _console.WriteLine(BuildHorizontalBorder(days.Count, columnWidth, '├', '┼', '┤'));

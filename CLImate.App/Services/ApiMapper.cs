@@ -82,6 +82,7 @@ public sealed class ApiMapper : IApiMapper
 
         var segments = new[]
         {
+            new SegmentAccumulator("Night", 0, 5),
             new SegmentAccumulator("Morning", 6, 11),
             new SegmentAccumulator("Afternoon", 12, 17),
             new SegmentAccumulator("Evening", 18, 23)

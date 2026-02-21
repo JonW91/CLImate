@@ -39,14 +39,21 @@ public sealed class CliOptionsParser : ICliOptionsParser
                     return CliOptionsParseResult.Success(options);
                 }
 
-                if (arg is "--units" or "-u")
+            if (arg is "--units" or "-u")
             {
                 if (i + 1 >= args.Length)
                 {
                     return CliOptionsParseResult.Failure("Missing value for --units.");
                 }
 
-                options.Units = ParseUnits(args[++i]);
+                var unitsValue = args[++i];
+                var parsedUnits = TryParseUnits(unitsValue);
+                if (parsedUnits is null)
+                {
+                    return CliOptionsParseResult.Failure($"Invalid units: '{unitsValue}'. Use 'metric' or 'imperial'.");
+                }
+
+                options.Units = parsedUnits.Value;
                 continue;
             }
 
@@ -111,7 +118,14 @@ public sealed class CliOptionsParser : ICliOptionsParser
 
             if (arg.StartsWith("--units=", StringComparison.OrdinalIgnoreCase))
             {
-                options.Units = ParseUnits(arg.Substring("--units=".Length));
+                var unitsValue = arg.Substring("--units=".Length);
+                var parsedUnits = TryParseUnits(unitsValue);
+                if (parsedUnits is null)
+                {
+                    return CliOptionsParseResult.Failure($"Invalid units: '{unitsValue}'. Use 'metric' or 'imperial'.");
+                }
+
+                options.Units = parsedUnits.Value;
                 continue;
             }
 
@@ -143,8 +157,18 @@ public sealed class CliOptionsParser : ICliOptionsParser
         return CliOptionsParseResult.Success(options);
     }
 
-    private static Units ParseUnits(string? value)
-        => string.Equals(value, "imperial", StringComparison.OrdinalIgnoreCase)
-            ? Units.Imperial
-            : Units.Metric;
+    private static Units? TryParseUnits(string? value)
+    {
+        if (string.Equals(value, "metric", StringComparison.OrdinalIgnoreCase))
+        {
+            return Units.Metric;
+        }
+
+        if (string.Equals(value, "imperial", StringComparison.OrdinalIgnoreCase))
+        {
+            return Units.Imperial;
+        }
+
+        return null;
+    }
 }

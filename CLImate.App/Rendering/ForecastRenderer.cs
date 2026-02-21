@@ -330,7 +330,7 @@ public sealed class ForecastRenderer : IForecastRenderer
             {
                 var descriptor = _weatherCodes.Describe(hour.WeatherCode);
                 var temp = ColouriseValue(hour.Temperature, units.Temperature, colourEnabled);
-                var precipValue = double.IsNaN(hour.Precipitation) ? "0" : hour.Precipitation.ToString("0.#");
+                var precipValue = double.IsNaN(hour.Precipitation) ? "n/a" : hour.Precipitation.ToString("0.#");
                 var windValue = double.IsNaN(hour.WindSpeed) ? "n/a" : hour.WindSpeed.ToString("0");
 
                 // Compact format: TIME | TEMP | WEATHER | PRECIP | WIND

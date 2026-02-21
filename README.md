@@ -12,7 +12,7 @@ A cross-platform command-line weather forecast application built with .NET 10. G
 - 🎨 **Colourful ASCII art** - Weather conditions displayed with ANSI colours
 - 📊 **7-day forecasts** - Daily high/low temperatures, precipitation, wind speeds
 - 🕐 **Today view** - Morning/afternoon/evening/night table with ASCII art per time period
-- ⚠️ **Weather warnings** - Integrated severe weather alerts (requires MeteoBlue API key)
+- ⚠️ **Weather warnings** - Severe weather alerts (US via NWS, EU via Meteoalarm; other regions show “no warnings available”)
 - 🌡️ **Metric/Imperial units** - Switch between measurement systems
 - 🖥️ **Cross-platform** - Works on Windows, macOS, and Linux terminals
 - 📦 **Self-contained** - No .NET runtime required (standalone binaries available)

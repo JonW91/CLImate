@@ -15,7 +15,7 @@
 - ANSI color support with `--no-color` and `--color` flags.
 - Per-character colorization for weather art (clouds/rain/snow/lightning).
 - Weather warnings integration with per-day warning lines.
-- Weather warnings service (MeteoBlue integration) implemented.
+- Weather warnings service (NWS + Meteoalarm, regional fallback) implemented.
 - Forecast model extended to include warnings by date.
 - CLI updated to fetch and display warnings.
 - xUnit test project with FakeItEasy.
@@ -23,9 +23,7 @@
 - Tests for domain models: Forecast, DailyForecast, ForecastUnits, WeatherWarning (11 tests).
 
 ## Next Steps
-- [ ] Add tests for MeteoBlueWarningsClient.
 - [ ] Add tests for ApiMapper and TemperatureColorScale.
 - [ ] Add tests for CLI argument parsing.
-- [ ] Make temperature thresholds configurable (config file or CLI flags).
 - [ ] Add a diagnostics mode for capturing raw API responses when needed.
-
+- [ ] Optional: keyed global warnings provider for regions outside US/EU.

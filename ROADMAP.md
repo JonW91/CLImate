@@ -13,7 +13,7 @@ This document outlines the development plan for making CLImate a production-read
 - 7-day, today-only, and hourly forecast modes
 - Location search with country code filtering
 - Metric/Imperial unit support
-- Weather warnings integration (MeteoBlue)
+- Weather warnings integration (US: NWS, EU: Meteoalarm; fallback message elsewhere)
 - Robust error handling for network failures ✅
 - Input validation with ISO 3166-1 country codes ✅
 - Adaptive terminal layout (horizontal/vertical) ✅

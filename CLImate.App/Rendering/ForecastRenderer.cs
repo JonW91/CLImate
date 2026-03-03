@@ -281,11 +281,15 @@ public sealed class ForecastRenderer : IForecastRenderer
     {
         try
         {
-            return Console.WindowWidth;
+            var width = Console.WindowWidth;
+            // Return default width if detection failed or returned invalid value
+            return width > 0 ? width : 80;
         }
         catch
         {
-            return null;
+            // Default to 80 columns when terminal width cannot be determined
+            // This ensures ASCII art works in non-interactive environments
+            return 80;
         }
     }
 

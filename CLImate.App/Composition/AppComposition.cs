@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using CLImate.App.Cli;
+using CLImate.App.Configuration;
 using CLImate.App.Rendering;
 using CLImate.App.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,6 +55,8 @@ public static class AppComposition
         services.AddSingleton<ITableRenderer, TableRenderer>();
         services.AddSingleton<IForecastRenderer, ForecastRenderer>();
         services.AddSingleton<ICliApplication, CliApplication>();
+        services.AddSingleton<IConfigurationService, ConfigurationService>();
+        services.AddSingleton<IOptionsResolver, OptionsResolver>();
 
         return services.BuildServiceProvider();
     }

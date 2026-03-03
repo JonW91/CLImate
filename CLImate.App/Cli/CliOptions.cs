@@ -27,6 +27,7 @@ public sealed class CliOptions
     public bool ShowVersion { get; set; }
     public ForecastMode ForecastMode { get; set; } = ForecastMode.Daily;
     public LayoutMode Layout { get; set; } = LayoutMode.Auto;
+    public bool Diagnostics { get; set; }
 
     // Legacy property for backwards compatibility
     public bool TodayOnly => ForecastMode == ForecastMode.Today;

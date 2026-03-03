@@ -1,3 +1,4 @@
+using CLImate.App.Configuration;
 using CLImate.App.Models;
 using CLImate.App.Rendering;
 using CLImate.App.Services;
@@ -12,7 +13,7 @@ public interface ICliApplication
 public sealed class CliApplication : ICliApplication
 {
     private readonly IConsoleIO _console;
-    private readonly ICliOptionsParser _optionsParser;
+    private readonly IOptionsResolver _optionsResolver;
     private readonly ICliHelp _help;
     private readonly IGeocodingService _geocodingService;
     private readonly IForecastService _forecastService;
@@ -24,7 +25,7 @@ public sealed class CliApplication : ICliApplication
 
     public CliApplication(
         IConsoleIO console,
-        ICliOptionsParser optionsParser,
+        IOptionsResolver optionsResolver,
         ICliHelp help,
         IGeocodingService geocodingService,
         IForecastService forecastService,
@@ -35,7 +36,7 @@ public sealed class CliApplication : ICliApplication
         IWeatherWarningsService warningsService)
     {
         _console = console;
-        _optionsParser = optionsParser;
+        _optionsResolver = optionsResolver;
         _help = help;
         _geocodingService = geocodingService;
         _forecastService = forecastService;
@@ -71,15 +72,15 @@ public sealed class CliApplication : ICliApplication
 
     private async Task<int> RunCoreAsync(string[] args, CancellationToken cancellationToken)
     {
-        var parseResult = _optionsParser.Parse(args);
-        if (!parseResult.IsValid)
+        var resolveResult = _optionsResolver.ResolveOptions(args);
+        if (!resolveResult.IsValid)
         {
-            _console.WriteLine(parseResult.ErrorMessage ?? "Invalid arguments.");
+            _console.WriteLine(resolveResult.ErrorMessage ?? "Invalid arguments.");
             _help.Print();
             return 1;
         }
 
-        var options = parseResult.Options;
+        var options = resolveResult.Options;
         if (options.ShowHelp)
         {
             _help.Print();

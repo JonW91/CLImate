@@ -12,22 +12,22 @@ class Climate < Formula
   on_macos do
     on_arm do
       url "https://github.com/JonW91/CLImate/releases/download/v#{version}/climate-macos-arm64.tar.gz"
-      sha256 "1d509a15ae1b803e7faa8f6378bcf6a38ff9a7ceffbc3b0131449badcce822b4"
+      sha256 "be3d461e22e907aabaa4ef9a6bebda586912d56629083b773bf41962921afdef"
     end
     on_intel do
       url "https://github.com/JonW91/CLImate/releases/download/v#{version}/climate-macos-x64.tar.gz"
-      sha256 "133d64ec34640c4aa5018cf0908ffc4c03d7ef4c1f485ab260fc7dd00b7e8897"
+      sha256 "ed7571e011231834e705cfe62ef4b95c8f65ccda63115cbf8f9501493abfd615"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/JonW91/CLImate/releases/download/v#{version}/climate-linux-arm64.tar.gz"
-      sha256 "a77d4bffd0526ea224ae3cc7c7991e8afd9521c0d50fd1b7de33dcb3e48085ea"
+      sha256 "e8773b1152a1424518473cfa02ac77f2469ea5690fa9a62d0f327392d339e910"
     end
     on_intel do
       url "https://github.com/JonW91/CLImate/releases/download/v#{version}/climate-linux-x64.tar.gz"
-      sha256 "15fa614c9e027b74399d312139246e86cc22a11676d47fc73e22c47365122d95"
+      sha256 "af2ba8f51d83c3e313ab403ff61d4fad0ebafc4236939b493d5488dca6a3b8d5"
     end
   end
 

@@ -116,6 +116,12 @@ public sealed class CliOptionsParser : ICliOptionsParser
                 continue;
             }
 
+            if (arg is "--diagnostics" or "-d")
+            {
+                options.Diagnostics = true;
+                continue;
+            }
+
             if (arg.StartsWith("--units=", StringComparison.OrdinalIgnoreCase))
             {
                 var unitsValue = arg.Substring("--units=".Length);

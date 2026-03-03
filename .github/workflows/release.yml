@@ -77,7 +77,7 @@ jobs:
 
           {
             echo "Package: climate"
-            echo "Version: $PKG_VERSION-1"
+            echo "Version: ${PKG_VERSION}-1"
             echo "Section: utils"
             echo "Priority: optional"
             echo "Architecture: amd64"
@@ -102,10 +102,10 @@ jobs:
           mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 
           # Create tarball for RPM
-          mkdir -p climate-${RPM_VERSION}
-          cp dist/linux-x64/climate climate-${RPM_VERSION}/
-          cp -r dist/linux-x64/Assets climate-${RPM_VERSION}/ 2>/dev/null || true
-          tar -czf ~/rpmbuild/SOURCES/climate-${RPM_VERSION}.tar.gz climate-${RPM_VERSION}
+          mkdir -p "climate-${RPM_VERSION}"
+          cp dist/linux-x64/climate "climate-${RPM_VERSION}/"
+          cp -r dist/linux-x64/Assets "climate-${RPM_VERSION}/" 2>/dev/null || true
+          tar -czf "~/rpmbuild/SOURCES/climate-${RPM_VERSION}.tar.gz" "climate-${RPM_VERSION}"
 
           # Create spec file
           cat > ~/rpmbuild/SPECS/climate.spec << EOF

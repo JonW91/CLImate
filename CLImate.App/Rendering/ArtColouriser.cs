@@ -12,6 +12,7 @@ public sealed class ArtColouriser : IArtColouriser
     private static readonly HashSet<char> CloudChars = new(new[] { '.', '-', '(', ')', '_' });
     private static readonly HashSet<char> SunChars = new(new[] { 'o', '\\', '/', '|', '*' });
     private static readonly HashSet<char> RainChars = new(new[] { '/' });
+    private static readonly HashSet<char> DrizzleChars = new(new[] { '\'' });
     private static readonly HashSet<char> SnowChars = new(new[] { '*' });
     private static readonly HashSet<char> LightningChars = new(new[] { '/', '\\' });
     private static readonly HashSet<char> DotChars = new(new[] { '.' });
@@ -118,27 +119,27 @@ public sealed class ArtColouriser : IArtColouriser
             return AnsiColour.Default;
         }
 
-        // Snow - asterisks are white, clouds are grey, dots are white
+        // Snow - asterisks are white, clouds are grey, dots are white for snow grains
         if (key.Contains("snow", StringComparison.OrdinalIgnoreCase))
         {
-            if (SnowChars.Contains(ch) || DotChars.Contains(ch))
-            {
-                return AnsiColour.White;
-            }
-
             if (CloudChars.Contains(ch))
             {
                 return AnsiColour.Grey;
             }
 
+            if (SnowChars.Contains(ch) || DotChars.Contains(ch))
+            {
+                return AnsiColour.White;
+            }
+
             return AnsiColour.Default;
         }
 
-        // Rain/drizzle - slashes are blue, asterisks (freezing) are white, clouds are grey
+        // Rain/drizzle - slashes and drizzle drops are blue, asterisks (freezing) are white, clouds are grey
         if (key.Contains("rain", StringComparison.OrdinalIgnoreCase)
             || key.Contains("drizzle", StringComparison.OrdinalIgnoreCase))
         {
-            if (RainChars.Contains(ch))
+            if (RainChars.Contains(ch) || DrizzleChars.Contains(ch))
             {
                 return AnsiColour.Blue;
             }

@@ -24,7 +24,7 @@ public sealed class TableRenderer : ITableRenderer
     private const int ArtColumnWidth = 18;
     private const int BorderWidth = 1;
     private const int MinWidthForHorizontal = 100;
-    private const int MinWidthForArtTable = 140;
+    private const int MinWidthForArtTable = 110;
 
     public TableRenderer(
         IConsoleIO console,
@@ -64,7 +64,8 @@ public sealed class TableRenderer : ITableRenderer
         }
 
         // Determine if we have enough width for ASCII art in table
-        var useAsciiArt = showArt && terminalWidth >= MinWidthForArtTable;
+        var requiredWidthWithArt = (days.Count * ArtColumnWidth) + days.Count + 1;
+        var useAsciiArt = showArt && terminalWidth >= requiredWidthWithArt;
         var columnWidth = useAsciiArt ? ArtColumnWidth : Math.Max(MinColumnWidth, 16);
         var totalWidth = (days.Count * columnWidth) + days.Count + 1;
 
@@ -345,7 +346,8 @@ public sealed class TableRenderer : ITableRenderer
         }
 
         var segments = today.Segments;
-        var useAsciiArt = showArt && terminalWidth >= MinWidthForArtTable;
+        var requiredWidthWithArt = (segments.Count * ArtColumnWidth) + segments.Count + 1;
+        var useAsciiArt = showArt && terminalWidth >= requiredWidthWithArt;
         var columnWidth = useAsciiArt ? ArtColumnWidth : Math.Max(MinColumnWidth, 16);
 
         _console.WriteLine();

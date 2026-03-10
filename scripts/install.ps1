@@ -125,14 +125,14 @@ try {
     if ($installDir -notin $pathDirs) {
       Write-Host "⚠️  $installDir is not in your PATH." -ForegroundColor Yellow
       Write-Host "   Add it manually via System Settings > Environment Variables" -ForegroundColor Yellow
-      Write-Host "   Or run this in an elevated PowerShell:" -ForegroundColor Yellow
-      Write-Host "   [Environment]::SetEnvironmentVariable('Path', `$env:Path + ';$installDir', 'User')" -ForegroundColor Cyan
+      Write-Host "   Or run this in an elevated PowerShell to add to PATH:" -ForegroundColor Yellow
+      Write-Host "   [Environment]::SetEnvironmentVariable('Path', `$env:Path + ';$($installDir)', 'User')" -ForegroundColor Cyan
       Write-Host ""
     }
   } else {
     Write-Host "⚠️  Ensure '$installDir' is in your PATH." -ForegroundColor Yellow
     Write-Host "   Add this to your shell profile (~/.bashrc, ~/.zshrc, etc.):" -ForegroundColor Yellow  
-    Write-Host "   export PATH=`"$installDir:`$PATH`"" -ForegroundColor Cyan
+    Write-Host "   export PATH=`"$($installDir):`$PATH`"" -ForegroundColor Cyan
     Write-Host ""
   }
 

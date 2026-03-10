@@ -12,7 +12,7 @@ A cross-platform command-line weather forecast application built with .NET 10. G
 - 🎨 **Colourful ASCII art** - Weather conditions displayed with ANSI colours
 - 📊 **7-day forecasts** - Daily high/low temperatures, precipitation, wind speeds
 - 🕐 **Today view** - Morning/afternoon/evening/night table with ASCII art per time period
-- ⚠️ **Weather warnings** - Severe weather alerts (US via NWS, EU via Meteoalarm; other regions show “no warnings available”)
+- ⚠️ **Weather warnings** - Severe weather alerts (US via NWS, EU via Meteoalarm; other regions show "no warnings available")
 - 🌡️ **Metric/Imperial units** - Switch between measurement systems
 - 🖥️ **Cross-platform** - Works on Windows, macOS, and Linux terminals
 - 📦 **Self-contained** - No .NET runtime required (standalone binaries available)
@@ -39,9 +39,7 @@ climate --country US Portland
 
 ## Installation
 
-> **Note:** CLImate is currently in **beta** (v0.1.0-beta). Package manager support is coming soon.
-
-### Option 1: One-Line Install Scripts (Recommended)
+### One-Line Install (Recommended)
 
 Download and install the self-contained binary - **no .NET runtime required**:
 
@@ -50,24 +48,23 @@ Download and install the self-contained binary - **no .NET runtime required**:
 curl -fsSL https://raw.githubusercontent.com/JonW91/CLImate/main/scripts/install.sh | sh
 ```
 
-**Windows PowerShell:**
+**Windows (PowerShell):**
 ```powershell
 irm https://raw.githubusercontent.com/JonW91/CLImate/main/scripts/install.ps1 | iex
 ```
 
-### Option 2: Download Binary Manually
+### Manual Download
 
-Download from the [Releases](https://github.com/JonW91/CLImate/releases) page:
+Download the binary for your platform from the [latest release](https://github.com/JonW91/CLImate/releases/latest):
 
-| Platform | Download |
-|----------|----------|
-| **Linux x64** | `climate-linux-x64.tar.gz` |
-| **Linux ARM64** | `climate-linux-arm64.tar.gz` |
-| **macOS Intel** | `climate-macos-x64.tar.gz` |
-| **macOS Apple Silicon** | `climate-macos-arm64.tar.gz` |
-| **Windows x64** | `climate-windows-x64.zip` |
+- `climate-linux-x64.tar.gz` - Linux (Intel/AMD 64-bit)
+- `climate-linux-arm64.tar.gz` - Linux (ARM 64-bit, e.g., Raspberry Pi)
+- `climate-macos-x64.tar.gz` - macOS (Intel)
+- `climate-macos-arm64.tar.gz` - macOS (Apple Silicon)
+- `climate-windows-x64.zip` - Windows (64-bit)
 
 Extract and add to your PATH:
+
 ```bash
 # Linux/macOS
 tar -xzf climate-*.tar.gz
@@ -75,229 +72,245 @@ sudo mv climate /usr/local/bin/
 
 # Windows (PowerShell)
 Expand-Archive climate-windows-x64.zip -DestinationPath $env:LOCALAPPDATA\CLImate
-# Add to PATH via System Settings or:
-$env:PATH += ";$env:LOCALAPPDATA\CLImate"
+# Add to PATH via System Settings
 ```
 
-### Option 3: Package Managers
+### Build from Source
 
-Install CLImate via these package managers:
-
-<details>
-<summary><strong>🍺 Homebrew (macOS/Linux)</strong> - Available</summary>
-
-```bash
-brew tap jonw91/climate
-brew install climate
-```
-</details>
-
-<details>
-<summary><strong>🪟 Scoop (Windows)</strong> - Available</summary>
-
-```powershell
-scoop bucket add climate https://github.com/JonW91/scoop-climate
-scoop install climate
-```
-</details>
-
-<details>
-<summary><strong>🍫 Chocolatey (Windows)</strong> - In Review</summary>
-
-```powershell
-choco install climate
-```
-
-> Awaiting approval from the Chocolatey community repository.
-</details>
-
-<details>
-<summary><strong>📦 WinGet (Windows)</strong> - In Review</summary>
-
-```powershell
-winget install JonW91.CLImate
-```
-
-> PR submitted to winget-pkgs, awaiting review.
-</details>
-
-<details>
-<summary><strong>🎩 DNF/RPM (Fedora/RHEL/CentOS)</strong> - Available</summary>
-
-```bash
-# Download and install RPM package directly:
-curl -fsSL https://github.com/JonW91/CLImate/releases/latest/download/climate-0.1.0~beta-1.x86_64.rpm -o climate.rpm
-sudo dnf install ./climate.rpm
-```
-</details>
-
-<details>
-<summary><strong>📦 APT/DEB (Debian/Ubuntu)</strong> - Available</summary>
-
-```bash
-# Download and install DEB package:
-curl -fsSL https://github.com/JonW91/CLImate/releases/latest/download/climate_0.1.0~beta_amd64.deb -o climate.deb
-sudo dpkg -i climate.deb
-```
-</details>
-
-### Option 4: .NET Global Tool
-
-If you have the [.NET 10 SDK](https://dotnet.microsoft.com/download) installed:
-
-```bash
-dotnet tool install --global CLImate --prerelease
-```
-
-Then run with:
-```bash
-climate London
-```
-
-### Option 5: Build from Source
-
-Requires [.NET 10 SDK](https://dotnet.microsoft.com/download).
+**Prerequisites:** [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 ```bash
 git clone https://github.com/JonW91/CLImate.git
-cd CLImate
-dotnet build
-dotnet run --project CLImate.App -- London
+cd CLImate/CLImate.App
+dotnet run -- London
 ```
-
-
-## Command-Line Options
-
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--help` | `-h` | Show help information |
-| `--version` | `-v` | Show version information |
-| `--units <metric\|imperial>` | `-u` | Set temperature/wind units (default: metric) |
-| `--country <code>` | `-c` | Filter by 2-letter country code (e.g., GB, US) |
-| `--today` | `-t` | Show today's forecast with time segments |
-| `--hourly` | | Show 24-hour hourly forecast for today |
-| `--horizontal` | `-H` | Force horizontal table layout |
-| `--vertical` | `-V` | Force vertical list layout |
-| `--no-art` | | Disable ASCII art, use text labels |
-| `--no-colour` | | Disable ANSI colour output |
-| `--colour` | | Force ANSI colours on |
-
-## Adaptive Layout
-
-CLImate automatically detects your terminal size and chooses the best layout:
-
-- **Wide terminals (140+ columns)**: Displays a compact horizontal table with ASCII art for all 7 days side-by-side
-- **Medium terminals (100-139 columns)**: Horizontal table with compact weather icons
-- **Narrow terminals (<100 columns)**: Uses a vertical list with detailed ASCII art per day
-
-The same applies to today's forecast (`-t`):
-- **Wide terminals**: Shows Morning/Afternoon/Evening/Night in a horizontal table with ASCII art
-- **Narrow terminals**: Vertical list with each time period stacked
-
-You can override this with `--horizontal` or `--vertical` flags.
 
 ## Usage Examples
 
+### Basic Weather
+
 ```bash
-# Basic usage
-climate Manchester
+# Current weather and 7-day forecast
+climate London
 
-# Disambiguate locations with country code
-climate -c GB Manchester
-climate -c US Portland
-
-# Imperial units for US users
-climate -u imperial Chicago
-
-# Minimal output for scripts/piping
-climate --no-art --no-colour Seattle
-
-# Detailed today forecast with time periods
-climate --today "San Francisco, CA"
+# Specific region to avoid ambiguity
+climate "London, Ontario" --country CA
+climate Portland --country US
 ```
 
-## How It Works
+### Different Views
 
-If multiple locations match your query, CLImate will prompt you to pick one. Use the `--country` flag with a 2-letter code to narrow results.
+```bash
+# Today's weather broken down by time periods
+climate --today "San Francisco, CA"
 
-CLImate also ships with a configurable country-name mapping file at `CLImate.App/Assets/country-codes.json`.
+# 24-hour hourly forecast
+climate --hourly Tokyo
+
+# Force horizontal table layout (if terminal is wide enough)
+climate --horizontal Paris
+
+# Force vertical list layout
+climate --vertical "New York"
+```
+
+### Units and Formatting
+
+```bash
+# Use imperial units (Fahrenheit, mph, inches)
+climate --units imperial Chicago
+
+# Use metric units (Celsius, km/h, mm) - default
+climate --units metric Berlin
+
+# Enable colours (default if terminal supports it)
+climate --colour London
+
+# Disable colours
+climate --no-colour London
+
+# Disable ASCII art (show text labels instead)
+climate --no-art London
+```
+
+### Advanced Options
+
+```bash
+# Specify country code to filter location search
+climate --country DE Frankfurt  # Frankfurt, Germany
+climate --country US Frankfurt  # Frankfurt, Kentucky
+
+# Show help
+climate --help
+
+# Show version
+climate --version
+```
+
+### Output Examples
+
+**7-Day Forecast (Vertical Layout):**
+```
+CLImate - Forecast for London, England, United Kingdom
+----------------------------------------------------
+
+7-Day Forecast
+────────────────────────────────────────
+
+┌─ TODAY · Tue 10 Mar ─────────────────────────
+│  Drizzle
+│        .--.    
+│     .-(    ).  
+│    (__.__)__)  
+│     ' ' ' '    
+│     ' ' ' '    
+│     ' ' ' '    
+│
+│  Temp: 5.4°C -> 9°C
+│  Rain: 1mm
+│  Wind: 32km/h (gusts 61km/h)
+└──────────────────────────────────────
+```
+
+**Today's Forecast (Horizontal Table):**
+```
+Today's Forecast · Monday 10 March
+───────────────────────────────────────────────────────────────────────────
+│         │ Morning    │ Afternoon  │ Evening    │ Night      │
+│         │ 6-12       │ 12-18      │ 18-24      │ 0-6        │
+├─────────┼────────────┼────────────┼────────────┼────────────┤
+│ Weather │ Drizzle    │ Overcast   │ Clear sky  │ Clear sky  │
+│         │    .--.    │    .--.    │  \ | /     │  \ | /     │
+│         │ .-(    ).  │ .-(    ).  │ -{(@)}--   │ -{(@)}--   │
+│         │(__.__)__)  │(__.__)__)  │  / | \     │  / | \     │
+│         │ ' ' ' '    │            │            │            │
+├─────────┼────────────┼────────────┼────────────┼────────────┤
+│ Temp    │ 6°C        │ 8°C        │ 7°C        │ 5°C        │
+│ Rain    │ 0.2mm      │ 0mm        │ 0mm        │ 0mm        │
+│ Wind    │ 12km/h     │ 15km/h     │ 8km/h      │ 6km/h      │
+└─────────┴────────────┴────────────┴────────────┴────────────┘
+```
+
+## Configuration
+
+CLImate reads configuration from:
+- **Linux/macOS:** `~/.config/climate/config.json`
+- **Windows:** `%APPDATA%\climate\config.json`
+
+### Example Configuration
+
+```json
+{
+  "defaultUnits": "metric",
+  "defaultCountry": "GB",
+  "showArt": true,
+  "useColour": true,
+  "favouriteLocations": [
+    { "name": "Home", "lat": 51.5074, "lon": -0.1278 },
+    { "name": "Work", "lat": 51.5155, "lon": -0.0922 }
+  ]
+}
+```
+
+## Command Reference
+
+```
+USAGE:
+    climate [OPTIONS] [LOCATION]
+
+ARGUMENTS:
+    <LOCATION>    Location to get weather for (city, region, address)
+
+OPTIONS:
+    -u, --units <UNITS>             Units: metric, imperial [default: metric]
+    -c, --country <CODE>            Two-letter country code (GB, US, DE, etc.)
+    -t, --today                     Show today's forecast only
+        --hourly                    Show 24-hour forecast
+    -H, --horizontal                Force horizontal table layout
+    -V, --vertical                  Force vertical list layout
+        --colour                    Force ANSI colours on
+        --no-colour                 Disable ANSI colours
+        --no-art                    Disable ASCII art (use text labels)
+    -h, --help                      Show help message
+        --version                   Show version information
+```
 
 ## Data Sources
 
-| Data | Provider | API Key Required |
-|------|----------|------------------|
-| Weather forecasts | [Open-Meteo](https://open-meteo.com/) | No (free) |
-| Geocoding | [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api) | No (free) |
-| Weather warnings | [MeteoBlue](https://www.meteoblue.com/) | Yes (optional) |
+- **Weather Data:** [Open-Meteo](https://open-meteo.com/) - Free, no API key required
+- **Location Search:** [Open-Meteo Geocoding API](https://open-meteo.com/en/docs/geocoding-api)
+- **Weather Warnings:** 
+  - **US:** [National Weather Service](https://www.weather.gov/)
+  - **Europe:** [Meteoalarm](https://www.meteoalarm.eu/)
+  - **Other regions:** "No warnings available for this region"
 
-### Weather Warnings
+## Technical Details
 
-Set the `METEOBLUE_API_KEY` environment variable for weather warning support:
-
-```bash
-export METEOBLUE_API_KEY=your_api_key_here
-```
-
-Without an API key, warnings will display as "none".
+- **Framework:** .NET 10
+- **Platforms:** Linux (x64, ARM64), macOS (x64, ARM64), Windows (x64)
+- **Dependencies:** None (self-contained binaries)
+- **Terminal Requirements:** 
+  - Minimum 45 columns for ASCII art
+  - ANSI color support recommended
+  - Unicode support for weather symbols
 
 ## Development
 
+### Prerequisites
+
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- Linux, macOS, or Windows
+
+### Build and Test
+
 ```bash
+# Clone and build
+git clone https://github.com/JonW91/CLImate.git
+cd CLImate
+
 # Run tests
 dotnet test
 
-# Build the solution
-dotnet build
+# Run locally
+cd CLImate.App
+dotnet run -- London
 
-# Publish self-contained binary for current platform
-dotnet publish CLImate.App -c Release --self-contained -p:PublishSingleFile=true
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
-
-## Publishing & Releases
-
-Use the helper script to build self-contained, single-file binaries for all platforms:
-
-```bash
+# Publish self-contained binary
 ./scripts/publish.sh
 ```
 
-### Release Asset Naming
+### Project Structure
 
-| Platform | Filename |
-|----------|----------|
-| Linux x64 | `climate-linux-x64.tar.gz` |
-| Linux ARM64 | `climate-linux-arm64.tar.gz` |
-| macOS x64 | `climate-macos-x64.tar.gz` |
-| macOS ARM64 (Apple Silicon) | `climate-macos-arm64.tar.gz` |
-| Windows x64 | `climate-windows-x64.zip` |
-
-### Creating a Release
-
-Push a tag to trigger GitHub Actions:
-
-```bash
-./scripts/tag-release.sh 0.1.0
-git push origin v0.1.0
+```
+CLImate/
+├── CLImate.App/           # Main application
+│   ├── Assets/            # ASCII art and data files
+│   ├── Cli/              # Command-line parsing
+│   ├── Models/           # Data models
+│   ├── Rendering/        # Display logic and ASCII art
+│   └── Services/         # API clients and business logic
+├── CLImate.Tests/         # Unit tests
+├── scripts/              # Build and installation scripts
+└── packaging/            # Package manager configurations
 ```
 
-## Roadmap
+## Contributing
 
-See [ROADMAP.md](ROADMAP.md) for the full development plan, including:
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-- ✅ Self-contained binaries (no runtime required)
-- ✅ .NET global tool (`dotnet tool install -g CLImate`)
-- ✅ Adaptive terminal layout (auto horizontal/vertical)
-- ✅ Hourly forecast mode (`--hourly`)
-- 🔲 Package manager distribution (Homebrew, Chocolatey, Scoop)
-- 🔲 Configuration file for user preferences
-- 🔲 Caching for reduced API calls
+### Priority Areas
+
+- **Platform testing** - Test on different terminals and operating systems
+- **Accessibility** - Screen reader compatibility, high contrast modes
+- **Localization** - Translations for weather descriptions
+- **Performance** - Caching, request optimization
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
+## Acknowledgments
 
-Made with ☀️ and ☔ by [JonW91](https://github.com/JonW91)
+- [Open-Meteo](https://open-meteo.com/) for providing free weather data
+- ASCII art inspired by [wttr.in](https://wttr.in/)
+- Community contributors and testers

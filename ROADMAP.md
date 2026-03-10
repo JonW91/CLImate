@@ -19,7 +19,8 @@ This document outlines the development plan for making CLImate a production-read
 - Adaptive terminal layout (horizontal/vertical) ✅
 - Graceful degradation for missing services ✅
 - CI/CD pipeline with GitHub Actions ✅
-- Comprehensive test coverage (121 tests) ✅
+- Comprehensive test coverage (168 tests) ✅
+- **Simple binary distribution via install scripts** ✅
 
 ### ⚠️ Remaining Areas for Improvement
 
@@ -32,113 +33,28 @@ This document outlines the development plan for making CLImate a production-read
 
 ---
 
-## Phase 1: Production Readiness (Priority: High) ✅
+## Distribution Strategy: Simple & Universal ✅
 
-### 1.1 Self-Contained Publishing ✅
-Already configured in publish scripts. Produces single-file executables for:
-- `linux-x64`, `linux-arm64`
-- `osx-x64`, `osx-arm64`  
-- `win-x64`
+### ✅ Current Approach: Install Scripts + Manual Download
+**Status: COMPLETE** - This approach works well and covers all use cases:
 
-**Action**: Verify publish scripts work and add to CI/CD.
-
-### 1.2 Robust Error Handling ✅
-Add graceful handling for:
-- [x] Network timeout/connectivity issues
-- [ ] API rate limiting (Open-Meteo is generous but has limits)
-- [x] Invalid API responses
-- [ ] Missing/corrupt asset files
-
-```csharp
-// Implemented in CliApplication.cs - wraps RunCoreAsync with try/catch
-catch (HttpRequestException)
-{
-    _console.WriteLine("Unable to reach weather service. Check your internet connection and try again.");
-    return 1;
-}
-catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
-{
-    _console.WriteLine("Request timed out. The weather service may be unavailable. Please try again.");
-    return 1;
-}
-```
-
-### 1.3 Input Validation ✅
-- [x] Sanitise location input (prevent injection in URLs) - Uses Uri.EscapeDataString in GeocodingService
-- [x] Validate country codes against ISO 3166-1 catalogue - Added IsValidCode() with full country list
-- [x] Handle special characters in location names - Uri.EscapeDataString handles encoding
-
-### 1.4 Graceful Degradation ✅
-- [x] Work without MeteoBlue API key (warnings show "none", service returns empty)
-- [x] Fallback if ASCII art file is missing/corrupt (shows text labels instead)
-- [x] Handle terminals without ANSI support (checks NO_COLOR env, IsOutputRedirected)
-
----
-
-## Phase 2: Distribution (Priority: High)
-
-### 2.1 GitHub Releases (Current)
-Self-contained binaries attached to tagged releases.
-
-**Installation:**
 ```bash
-# Linux/macOS
+# One-line install (recommended)
 curl -fsSL https://raw.githubusercontent.com/JonW91/CLImate/main/scripts/install.sh | sh
 
-# Windows PowerShell
-irm https://raw.githubusercontent.com/JonW91/CLImate/main/scripts/install.ps1 | iex
+# Manual download from GitHub releases
+# Build from source for developers
 ```
 
-### 2.2 Package Managers
+**Benefits:**
+- ✅ Works on any platform
+- ✅ No external dependencies 
+- ✅ Single point of truth (GitHub releases)
+- ✅ No maintenance overhead for package managers
+- ✅ Users get latest version immediately
+- ✅ Simple to support and troubleshoot
 
-| Package Manager | Platform | Status | Notes |
-|----------------|----------|--------|-------|
-| **NuGet (.NET Tool)** | Cross-platform | 🔲 Ready | Automated in release workflow (requires `NUGET_API_KEY`) |
-| **Chocolatey** | Windows | 🔄 In Review | Submitted to community repository |
-| **Winget** | Windows | 🔄 In Review | PR submitted to winget-pkgs |
-| **Scoop** | Windows | ✅ Available | `scoop bucket add climate https://github.com/JonW91/scoop-climate` |
-| **Homebrew** | macOS/Linux | ⚠️ Issues | Tap exists but installation failing - needs debugging |
-| **APT/Debian** | Linux | 🔲 Ready | `.deb` package scripts in `packaging/deb/` |
-| **DNF/RPM** | Fedora/RHEL | 🔲 Ready | `.rpm` spec in `packaging/rpm/` |
-| **AUR** | Arch Linux | 🔲 Future | Community maintained |
-| **Snap** | Linux | 🔲 Future | Universal Linux package |
-
-### 2.3 .NET Global Tool ✅
-```bash
-dotnet tool install --global CLImate
-```
-**Status: Configured** - Added to CLImate.App.csproj
-- [x] Add `<PackAsTool>true</PackAsTool>` to csproj
-- [x] Configure NuGet package metadata
-- [ ] Publish to NuGet.org (automated in release workflow; requires `NUGET_API_KEY`)
-
-```xml
-<!-- Already added to CLImate.App.csproj -->
-<PropertyGroup>
-  <PackAsTool>true</PackAsTool>
-  <ToolCommandName>climate</ToolCommandName>
-  <PackageId>CLImate</PackageId>
-  <Version>0.1.0</Version>
-  <Authors>JonW91</Authors>
-  <Description>CLI weather forecasts with beautiful ASCII art. Get 7-day forecasts directly in your terminal.</Description>
-  <PackageProjectUrl>https://github.com/JonW91/CLImate</PackageProjectUrl>
-  <RepositoryUrl>https://github.com/JonW91/CLImate</RepositoryUrl>
-  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  <PackageTags>weather;cli;terminal;forecast;ascii-art;dotnet-tool</PackageTags>
-  <PackageReadmeFile>README.md</PackageReadmeFile>
-</PropertyGroup>
-```
-
-### 2.4 Docker Image
-```dockerfile
-FROM mcr.microsoft.com/dotnet/runtime:10.0-alpine
-COPY publish/ /app/
-ENTRYPOINT ["/app/climate"]
-```
-
-```bash
-docker run --rm ghcr.io/jonw91/climate London
-```
+**Decision: Package managers removed from scope** - They add complexity and maintenance burden without significant user benefit.
 
 ---
 
@@ -302,46 +218,59 @@ jobs:
 
 ---
 
-## Distribution Comparison
+## Simplified Development Focus
 
-| Method | Pros | Cons | Best For |
-|--------|------|------|----------|
-| **GitHub Release** | Simple, universal | Manual download | Power users |
-| **.NET Tool** | Easy install, auto-update | Requires .NET SDK | .NET developers |
-| **Homebrew** | Mac-native, trusted | Mac/Linux only | macOS users |
-| **Chocolatey** | Windows-native | Windows only | Windows users |
-| **Docker** | Isolated, reproducible | Overhead | CI/CD, servers |
-| **Self-contained binary** | No dependencies | Larger file size | Everyone |
+### ✅ Completed (Production Ready)
+1. **Binary Distribution** - Install scripts work universally
+2. **ASCII Art Display** - Fixed terminal width detection issues  
+3. **Comprehensive Testing** - 168 tests passing
+4. **Cross-Platform Support** - Linux, macOS, Windows
+5. **CI/CD Pipeline** - Automated builds and releases
 
----
+### 🎯 Remaining Priorities
 
-## Recommended Priority Order
+| Priority | Feature | Benefit |
+|----------|---------|---------|
+| **Medium** | Configuration file support | User convenience for defaults |
+| **Medium** | Basic caching (5-15 min) | Reduce API calls, faster responses |
+| **Low** | Enhanced error handling | API rate limits, asset recovery |
+| **Low** | Additional output formats | JSON, CSV, brief modes |
 
-1. ~~**Immediate**: Verify self-contained publishing works~~ ✅
-2. ~~**Short-term**: Add error handling, create GitHub Actions workflow~~ ✅
-3. **Medium-term**: NuGet tool package, Homebrew tap
-4. **Long-term**: Configuration file, caching, package managers
+### 📦 Distribution Strategy: Keep It Simple
 
----
+**Decision:** Focus on **binary distribution** rather than package managers:
 
-## Version Milestones
+✅ **What works:**
+- One-line install scripts for all platforms
+- Direct GitHub releases download
+- Self-contained binaries (no dependencies)
+- Build from source for developers
 
-| Version | Target | Features |
-|---------|--------|----------|
-| **0.1.0** | Current | Basic forecasts, ASCII art |
-| **0.2.0** | +2 weeks | Error handling, CI/CD, tested publishing |
-| **0.3.0** | +1 month | NuGet tool, Homebrew tap |
-| **0.4.0** | +2 months | Configuration file, caching |
-| **1.0.0** | +3 months | Production ready, stable API |
+❌ **What to avoid:**
+- Package manager maintenance overhead
+- Multiple distribution channels to support
+- Version synchronization across platforms
+- Community repository approval processes
+
+### 🚀 Version Milestones
+
+| Version | Status | Focus |
+|---------|--------|-------|
+| **0.1.0** | ✅ Current | Core functionality, ASCII art fixes |
+| **0.2.0** | 🎯 Next | Configuration file, basic caching |
+| **0.3.0** | Future | Enhanced error handling, output formats |
+| **1.0.0** | Future | Stable API, accessibility features |
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for how to help with this roadmap.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
 
-Priority areas for contributions:
-- Package manager manifests (Homebrew, Chocolatey, Scoop)
-- CI/CD workflows
-- Test coverage
-- Documentation
+**Current priorities for contributions:**
+- Configuration system implementation
+- Caching layer for API responses  
+- Cross-platform testing
+- Documentation improvements
+
+The project is **production-ready** as-is - remaining features are enhancements for user convenience rather than critical fixes.

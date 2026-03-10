@@ -47,8 +47,10 @@ public sealed class TableRenderer : ITableRenderer
         if (forecast.Days.Count == 0)
             return false;
 
-        var requiredWidth = (forecast.Days.Count * MinColumnWidth) + (forecast.Days.Count + 1) * BorderWidth;
-        return terminalWidth >= requiredWidth && terminalWidth >= MinWidthForHorizontal;
+        // For horizontal mode to be worthwhile, we need enough width for good ASCII art
+        // Otherwise, vertical mode provides a much better experience
+        var requiredWidthWithArt = (forecast.Days.Count * ArtColumnWidth) + (forecast.Days.Count + 1) * BorderWidth;
+        return terminalWidth >= requiredWidthWithArt;
     }
 
     public void RenderHorizontalTable(Forecast forecast, bool showArt, bool useColour, int terminalWidth)
@@ -324,13 +326,14 @@ public sealed class TableRenderer : ITableRenderer
         var today = forecast.Today;
         if (today == null || today.Segments.Count == 0)
         {
-            // Fall back to single day view
+            // Fall back to single day view - always allow since it's just one column
             return forecast.Days.Count > 0 && terminalWidth >= 80;
         }
 
         var segmentCount = today.Segments.Count;
-        var requiredWidth = (segmentCount * MinColumnWidth) + (segmentCount + 1) * BorderWidth;
-        return terminalWidth >= requiredWidth && terminalWidth >= 70;
+        // For today table to be worthwhile, we need good ASCII art display
+        var requiredWidthWithArt = (segmentCount * ArtColumnWidth) + (segmentCount + 1) * BorderWidth;
+        return terminalWidth >= requiredWidthWithArt;
     }
 
     public void RenderTodayTable(Forecast forecast, bool showArt, bool useColour, int terminalWidth)

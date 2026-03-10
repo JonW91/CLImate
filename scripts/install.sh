@@ -28,7 +28,7 @@ case "$uname_s" in
     fi
     OS="linux" 
     ;;
-  Darwin) OS="macos" ;;
+  Darwin) OS="osx" ;;  # Note: release files use 'osx' naming
   MINGW*|MSYS*|CYGWIN*) OS="windows" ;;
   *)
     echo "❌ Unsupported OS: $uname_s" >&2

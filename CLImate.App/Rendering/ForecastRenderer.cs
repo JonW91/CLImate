@@ -97,8 +97,9 @@ public sealed class ForecastRenderer : IForecastRenderer
             _console.WriteLine($"│  Rain: {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
             _console.WriteLine($"│  Wind: {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
 
-            // Warning (only if present)
-            if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
+            // Warning (only if present and meaningful)
+            if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase) &&
+                !warning.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
             {
                 _console.WriteLine($"│  !  {warning}");
             }
@@ -141,7 +142,8 @@ public sealed class ForecastRenderer : IForecastRenderer
         _console.WriteLine($"┌─ {dayHeader} ─────────────────────────");
 
         var warning = GetWarning(forecast, today.Date);
-        if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase) &&
+            !warning.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
         {
             _console.WriteLine($"│  !  {warning}");
         }
@@ -243,7 +245,8 @@ public sealed class ForecastRenderer : IForecastRenderer
         _console.WriteLine($"│  Rain: {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
         _console.WriteLine($"│  Wind: {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
 
-        if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase) &&
+            !warning.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
         {
             _console.WriteLine($"│  !  {warning}");
         }
@@ -312,9 +315,10 @@ public sealed class ForecastRenderer : IForecastRenderer
         _console.WriteLine(new string('─', 50));
         _console.WriteLine();
 
-        // Check for warnings
+        // Check for warnings - only show if there are real warnings
         if (forecast.WarningsByDate.TryGetValue(hourly.Date, out var warning) &&
-            !string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase))
+            !string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase) &&
+            !warning.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
         {
             _console.WriteLine($"  ! Warning: {warning}");
             _console.WriteLine();

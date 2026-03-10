@@ -1,6 +1,6 @@
 # CLImate 🌤️
 
-A cross-platform command-line weather forecast application built with .NET 10. Get beautiful ASCII art weather forecasts directly in your terminal.
+A cross-platform command-line weather forecast application built with .NET 10. Get ASCII art weather forecasts directly in your terminal.
 
 ![.NET 10](https://img.shields.io/badge/.NET-10.0-purple)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -9,7 +9,7 @@ A cross-platform command-line weather forecast application built with .NET 10. G
 ## Features
 
 - 🌍 **Global location search** - Search by city, region, or address worldwide
-- 🎨 **Colourful ASCII art** - Weather conditions displayed with ANSI colours
+- 🎨 **ASCII art weather** - Weather conditions displayed with ANSI colours
 - 📊 **7-day forecasts** - Daily high/low temperatures, precipitation, wind speeds
 - 🕐 **Today view** - Morning/afternoon/evening/night table with ASCII art per time period
 - ⚠️ **Weather warnings** - Severe weather alerts (US via NWS, EU via Meteoalarm; other regions show "no warnings available")

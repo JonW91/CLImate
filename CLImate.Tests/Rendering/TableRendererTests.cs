@@ -51,6 +51,7 @@ public sealed class TableRendererTests
     [InlineData(50)]
     [InlineData(80)]
     [InlineData(99)]
+    [InlineData(133)]  // Just under required width for 7-day with art (134)
     public void CanRenderHorizontally_WithNarrowTerminal_ReturnsFalse(int width)
     {
         var forecast = CreateForecast(dayCount: 7);
@@ -61,8 +62,8 @@ public sealed class TableRendererTests
     }
 
     [Theory]
-    [InlineData(110)]
-    [InlineData(120)]
+    [InlineData(134)]  // Exactly the required width for 7-day with art (7*18 + 8*1 = 134)
+    [InlineData(150)]  
     [InlineData(200)]
     public void CanRenderHorizontally_WithWideTerminal_ReturnsTrue(int width)
     {
@@ -126,9 +127,11 @@ public sealed class TableRendererTests
     {
         var forecast = CreateForecast(dayCount: 3);
 
-        _renderer.RenderHorizontalTable(forecast, showArt: true, useColour: false, terminalWidth: 120);
+        // 3-day forecast needs (3*18 + 4) = 58 chars for ASCII art
+        // Use a width just below that threshold
+        _renderer.RenderHorizontalTable(forecast, showArt: true, useColour: false, terminalWidth: 55);
 
-        // With terminalWidth < 140, ASCII art is not used
+        // With terminalWidth < 58, ASCII art should not be used for 3 days
         A.CallTo(() => _asciiArt.GetArt(A<string>._, A<int?>._))
             .MustNotHaveHappened();
     }

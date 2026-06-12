@@ -9,10 +9,10 @@ public sealed class ConfigurationService : IConfigurationService
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly IConsoleIO _console;
 
-    public ConfigurationService(IConsoleIO console)
+    public ConfigurationService(IConsoleIO console, string? configDirectory = null)
     {
         _console = console;
-        _configPath = Path.Combine(ResolveConfigDirectory(), "config.json");
+        _configPath = Path.Combine(configDirectory ?? ResolveConfigDirectory(), "config.json");
 
         _jsonOptions = new JsonSerializerOptions
         {

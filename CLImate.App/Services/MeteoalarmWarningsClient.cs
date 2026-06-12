@@ -51,6 +51,11 @@ public sealed class MeteoalarmWarningsClient : IMeteoalarmWarningsClient
         {
             return Array.Empty<WeatherWarning>();
         }
+        catch (WeatherApiException)
+        {
+            // Warnings are best-effort; never let a failing alerts feed block the forecast.
+            return Array.Empty<WeatherWarning>();
+        }
     }
 
     private static string? GetString(JsonElement element, string name)

@@ -1,6 +1,5 @@
 using CLImate.App.Cli;
 using CLImate.App.Configuration;
-using CLImate.App.Models;
 
 namespace CLImate.App.Services;
 
@@ -30,8 +29,7 @@ public sealed class OptionsResolver : IOptionsResolver
     public ResolveResult ResolveOptions(string[] args)
     {
         var parseResult = _parser.Parse(args);
-        
-        // If parsing failed, return the error
+
         if (!parseResult.IsValid)
         {
             return new ResolveResult
@@ -43,29 +41,27 @@ public sealed class OptionsResolver : IOptionsResolver
         }
 
         var options = parseResult.Options;
-        
-        // Load config and apply defaults where CLI args aren't explicitly set
+
+        // Config-file values fill in only the settings the user did not pass
+        // explicitly on the command line — CLI flags always win.
         var config = _configService.GetConfig();
-        
-        // Apply config defaults - CLI args take precedence
-        // Only apply if the CLI default is still in place (user didn't override)
-        if (options.Units == Units.Metric && config.DefaultUnits == Units.Imperial)
+
+        if (!options.UnitsSetExplicitly)
         {
             options.Units = config.DefaultUnits;
         }
-        
+
         if (string.IsNullOrEmpty(options.CountryCode) && !string.IsNullOrEmpty(config.DefaultCountry))
         {
             options.CountryCode = config.DefaultCountry;
         }
-        
-        // ShowArt and UseColour default to true, so only apply if config says false
-        if (options.ShowArt && !config.ShowArt)
+
+        if (!options.ShowArtSetExplicitly)
         {
             options.ShowArt = config.ShowArt;
         }
-        
-        if (options.UseColour && !config.UseColour)
+
+        if (!options.UseColourSetExplicitly)
         {
             options.UseColour = config.UseColour;
         }

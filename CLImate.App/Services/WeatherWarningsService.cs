@@ -78,6 +78,15 @@ public sealed class WeatherWarningsService : IWeatherWarningsService
 
             var current = start.Value;
             var last = end ?? start.Value;
+
+            // Clamp to a sane window so a malformed alert with a far-future end
+            // date cannot cause an effectively unbounded loop.
+            var maxLast = start.Value.AddDays(14);
+            if (last > maxLast)
+            {
+                last = maxLast;
+            }
+
             while (current <= last)
             {
                 var key = current.ToString("yyyy-MM-dd");

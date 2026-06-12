@@ -53,6 +53,13 @@ public sealed class CliApplication : ICliApplication
         {
             return await RunCoreAsync(args, cancellationToken);
         }
+        catch (WeatherApiException ex)
+        {
+            _console.WriteLine(ex.IsTransient
+                ? $"The weather service is temporarily unavailable (HTTP {(int)ex.StatusCode}). Please try again in a moment."
+                : $"The weather service rejected the request (HTTP {(int)ex.StatusCode}). If this persists, please report it at https://github.com/JonW91/CLImate/issues.");
+            return 1;
+        }
         catch (HttpRequestException)
         {
             _console.WriteLine("Unable to reach weather service. Check your internet connection and try again.");

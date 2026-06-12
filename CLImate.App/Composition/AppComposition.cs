@@ -26,8 +26,10 @@ public static class AppComposition
                 Timeout = TimeSpan.FromSeconds(20)
             };
 
-            http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("CLImate", "0.1"));
-            http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(Fedora-Termux)"));
+            // api.weather.gov requires a descriptive User-Agent with a point of contact.
+            var version = typeof(AppComposition).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
+            http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("CLImate", version));
+            http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(+https://github.com/JonW91/CLImate)"));
 
             return http;
         });

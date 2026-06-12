@@ -6,6 +6,20 @@
 # dotenv files
 .env
 
+# Local debug/release scratch output (do not commit)
+output.txt
+hashes.txt
+all-hashes.txt
+win-hash.txt
+sha256.txt
+run-id.txt
+workflow-status.txt
+workflow-failure.txt
+release-check.json
+*.backup
+README_OLD.md
+CHANGES_SINCE_LAST_COMMIT.md
+
 # User-specific files
 *.rsuser
 *.suo

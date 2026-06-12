@@ -26,7 +26,20 @@ public sealed class GeocodingService : IGeocodingService
             BuildCountryCodeParameter(countryCode);
 
         var response = await _client.GetAsync<GeocodeResponse>(url, cancellationToken);
-        return _mapper.MapGeocoding(response);
+        var results = _mapper.MapGeocoding(response);
+
+        // Open-Meteo's countryCode filter is advisory; apply it client-side too so
+        // results from other countries never slip through.
+        if (!string.IsNullOrWhiteSpace(countryCode))
+        {
+            var filtered = results
+                .Where(r => string.Equals(r.CountryCode, countryCode, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (filtered.Count > 0)
+                results = filtered;
+        }
+
+        return results;
     }
 
     private static string BuildCountryCodeParameter(string? countryCode)

@@ -22,6 +22,7 @@ public sealed class CliApplication : ICliApplication
     private readonly ILocationInputParser _locationInputParser;
     private readonly IForecastRenderer _forecastRenderer;
     private readonly IWeatherWarningsService _warningsService;
+    private readonly ITerminalInfo _terminalInfo;
 
     public CliApplication(
         IConsoleIO console,
@@ -33,7 +34,8 @@ public sealed class CliApplication : ICliApplication
         ILocationFormatter locationFormatter,
         ILocationInputParser locationInputParser,
         IForecastRenderer forecastRenderer,
-        IWeatherWarningsService warningsService)
+        IWeatherWarningsService warningsService,
+        ITerminalInfo terminalInfo)
     {
         _console = console;
         _optionsResolver = optionsResolver;
@@ -45,6 +47,7 @@ public sealed class CliApplication : ICliApplication
         _locationInputParser = locationInputParser;
         _forecastRenderer = forecastRenderer;
         _warningsService = warningsService;
+        _terminalInfo = terminalInfo;
     }
 
     public async Task<int> RunAsync(string[] args, CancellationToken cancellationToken = default)
@@ -103,6 +106,12 @@ public sealed class CliApplication : ICliApplication
         var locationInput = options.LocationInput;
         if (string.IsNullOrWhiteSpace(locationInput))
         {
+            if (_terminalInfo.IsInputRedirected)
+            {
+                _console.WriteLine("No location provided. Pass a location as an argument (e.g. climate London).");
+                return 1;
+            }
+
             locationInput = Prompt("Enter a location (city, region, or address): ");
         }
 

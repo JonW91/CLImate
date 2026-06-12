@@ -5,7 +5,7 @@ namespace CLImate.App.Services;
 
 public interface IWeatherWarningsService
 {
-    Task<IReadOnlyDictionary<string, string>> GetDailyWarningsAsync(
+    Task<IReadOnlyDictionary<string, WarningResult>> GetDailyWarningsAsync(
         double latitude,
         double longitude,
         string? countryCode,
@@ -24,14 +24,14 @@ public sealed class WeatherWarningsService : IWeatherWarningsService
         _meteoalarmClient = meteoalarmClient;
     }
 
-    public async Task<IReadOnlyDictionary<string, string>> GetDailyWarningsAsync(
+    public async Task<IReadOnlyDictionary<string, WarningResult>> GetDailyWarningsAsync(
         double latitude,
         double longitude,
         string? countryCode,
         IReadOnlyList<string> dates,
         CancellationToken cancellationToken)
     {
-        var output = dates.ToDictionary(d => d, _ => "none");
+        var output = dates.ToDictionary(d => d, _ => WarningResult.None);
 
         if (IsEuCountry(countryCode))
         {
@@ -49,14 +49,14 @@ public sealed class WeatherWarningsService : IWeatherWarningsService
 
         foreach (var date in dates)
         {
-            output[date] = "no warnings available for this region";
+            output[date] = WarningResult.RegionalUnavailable;
         }
 
         return output;
     }
 
-    private static async Task<IReadOnlyDictionary<string, string>> PopulateWarningsAsync(
-        Dictionary<string, string> output,
+    private static async Task<IReadOnlyDictionary<string, WarningResult>> PopulateWarningsAsync(
+        Dictionary<string, WarningResult> output,
         Func<Task<IReadOnlyList<WeatherWarning>>> fetch)
     {
         var warnings = await fetch();
@@ -92,13 +92,13 @@ public sealed class WeatherWarningsService : IWeatherWarningsService
                 var key = current.ToString("yyyy-MM-dd");
                 if (output.TryGetValue(key, out var existing))
                 {
-                    if (existing == "none" || existing.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
+                    if (!existing.IsActive)
                     {
-                        output[key] = summary;
+                        output[key] = WarningResult.Active(summary);
                     }
-                    else if (!existing.Contains(summary, StringComparison.OrdinalIgnoreCase))
+                    else if (!existing.Text.Contains(summary, StringComparison.OrdinalIgnoreCase))
                     {
-                        output[key] = $"{existing}; {summary}";
+                        output[key] = WarningResult.Active($"{existing.Text}; {summary}");
                     }
                 }
 

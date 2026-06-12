@@ -36,12 +36,12 @@ public sealed class NwsWarningsClient : INwsWarningsClient
                     continue;
                 }
 
-                var headline = GetString(props, "headline") ?? GetString(props, "event") ?? "Weather alert";
-                var severity = GetString(props, "severity");
+                var headline = WarningJsonHelpers.GetString(props, "headline") ?? WarningJsonHelpers.GetString(props, "event") ?? "Weather alert";
+                var severity = WarningJsonHelpers.GetString(props, "severity");
                 var summary = string.IsNullOrWhiteSpace(severity) ? headline : $"{headline} ({severity})";
 
-                var starts = ParseDate(props, "effective", "onset");
-                var ends = ParseDate(props, "ends", "expires");
+                var starts = WarningJsonHelpers.ParseDate(props, "effective", "onset");
+                var ends = WarningJsonHelpers.ParseDate(props, "ends", "expires");
 
                 results.Add(new WeatherWarning(summary, starts, ends));
             }
@@ -61,38 +61,5 @@ public sealed class NwsWarningsClient : INwsWarningsClient
             // Warnings are best-effort; never let a failing alerts feed block the forecast.
             return Array.Empty<WeatherWarning>();
         }
-    }
-
-    private static string? GetString(JsonElement element, string name)
-    {
-        if (element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String)
-        {
-            var text = value.GetString();
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                return text;
-            }
-        }
-
-        return null;
-    }
-
-    private static DateTimeOffset? ParseDate(JsonElement element, params string[] names)
-    {
-        foreach (var name in names)
-        {
-            var raw = GetString(element, name);
-            if (string.IsNullOrWhiteSpace(raw))
-            {
-                continue;
-            }
-
-            if (DateTimeOffset.TryParse(raw, out var dto))
-            {
-                return dto;
-            }
-        }
-
-        return null;
     }
 }

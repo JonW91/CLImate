@@ -28,9 +28,9 @@ public sealed class ForecastTests
             new DailyForecast("2026-02-01", 1, 15.0, 10.0, 2.5, 12.0, 25.0)
         };
         var units = new ForecastUnits("°C", "mm", "km/h", "km/h");
-        var warnings = new Dictionary<string, string>
+        var warnings = new Dictionary<string, WarningResult>
         {
-            ["2026-02-01"] = "Heavy rain"
+            ["2026-02-01"] = WarningResult.Active("Heavy rain")
         };
 
         var forecast = new Forecast(days, units, today: null, warningsByDate: warnings);
@@ -38,7 +38,8 @@ public sealed class ForecastTests
         Assert.Equal(days, forecast.Days);
         Assert.Equal(units, forecast.Units);
         Assert.Single(forecast.WarningsByDate);
-        Assert.Equal("Heavy rain", forecast.WarningsByDate["2026-02-01"]);
+        Assert.True(forecast.WarningsByDate["2026-02-01"].IsActive);
+        Assert.Equal("Heavy rain", forecast.WarningsByDate["2026-02-01"].Text);
     }
 
     [Fact]
@@ -52,10 +53,10 @@ public sealed class ForecastTests
         var units = new ForecastUnits("°C", "mm", "km/h", "km/h");
         var forecast = new Forecast(days, units);
 
-        var warnings = new Dictionary<string, string>
+        var warnings = new Dictionary<string, WarningResult>
         {
-            ["2026-02-01"] = "Heavy rain",
-            ["2026-02-02"] = "Strong winds"
+            ["2026-02-01"] = WarningResult.Active("Heavy rain"),
+            ["2026-02-02"] = WarningResult.Active("Strong winds")
         };
 
         var forecastWithWarnings = forecast.WithWarnings(warnings);
@@ -63,9 +64,9 @@ public sealed class ForecastTests
         Assert.Equal(days, forecastWithWarnings.Days);
         Assert.Equal(units, forecastWithWarnings.Units);
         Assert.Equal(2, forecastWithWarnings.WarningsByDate.Count);
-        Assert.Equal("Heavy rain", forecastWithWarnings.WarningsByDate["2026-02-01"]);
-        Assert.Equal("Strong winds", forecastWithWarnings.WarningsByDate["2026-02-02"]);
-        Assert.Empty(forecast.WarningsByDate); // Original should be unchanged
+        Assert.Equal("Heavy rain", forecastWithWarnings.WarningsByDate["2026-02-01"].Text);
+        Assert.Equal("Strong winds", forecastWithWarnings.WarningsByDate["2026-02-02"].Text);
+        Assert.Empty(forecast.WarningsByDate);
     }
 
     [Fact]
@@ -77,7 +78,10 @@ public sealed class ForecastTests
         };
         var units = new ForecastUnits("°C", "mm", "km/h", "km/h");
         var original = new Forecast(days, units);
-        var warnings = new Dictionary<string, string> { ["2026-02-01"] = "Test warning" };
+        var warnings = new Dictionary<string, WarningResult>
+        {
+            ["2026-02-01"] = WarningResult.Active("Test warning")
+        };
 
         var updated = original.WithWarnings(warnings);
 
@@ -135,7 +139,7 @@ public sealed class WeatherWarningTests
     {
         var starts = DateTimeOffset.Parse("2026-02-01T12:00:00Z");
         var ends = DateTimeOffset.Parse("2026-02-02T12:00:00Z");
-        
+
         var warning = new WeatherWarning("Heavy rain", starts, ends);
 
         Assert.Equal("Heavy rain", warning.Summary);
@@ -151,5 +155,32 @@ public sealed class WeatherWarningTests
         Assert.Equal("Unknown event", warning.Summary);
         Assert.Null(warning.Starts);
         Assert.Null(warning.Ends);
+    }
+}
+
+public sealed class WarningResultTests
+{
+    [Fact]
+    public void None_IsNotActive()
+    {
+        Assert.False(WarningResult.None.IsActive);
+        Assert.Equal(WarningStatus.None, WarningResult.None.Status);
+    }
+
+    [Fact]
+    public void RegionalUnavailable_IsNotActive()
+    {
+        Assert.False(WarningResult.RegionalUnavailable.IsActive);
+        Assert.Equal(WarningStatus.RegionalUnavailable, WarningResult.RegionalUnavailable.Status);
+    }
+
+    [Fact]
+    public void Active_IsActiveAndHasText()
+    {
+        var result = WarningResult.Active("Heavy rain");
+
+        Assert.True(result.IsActive);
+        Assert.Equal(WarningStatus.Active, result.Status);
+        Assert.Equal("Heavy rain", result.Text);
     }
 }

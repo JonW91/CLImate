@@ -66,7 +66,7 @@ public sealed class ForecastRenderer : IForecastRenderer
 
         _console.WriteLine();
         _console.WriteLine("7-Day Forecast");
-        _console.WriteLine(new string('─', 40));
+        _console.WriteLine(new string('─', BoxWidth));
         _console.WriteLine();
 
         foreach (var day in forecast.Days)
@@ -75,12 +75,10 @@ public sealed class ForecastRenderer : IForecastRenderer
             var art = BuildArt(descriptor.ArtKey, descriptor.ArtColour, showArt, colourEnabled);
             var warning = GetWarning(forecast, day.Date);
 
-            // Header with day name and date
             var dayHeader = FormatDayHeader(day.Date);
-            _console.WriteLine($"┌─ {dayHeader} ─────────────────────────");
+            _console.WriteLine(BuildBoxTop(dayHeader));
             _console.WriteLine($"│  {descriptor.Description}");
 
-            // ASCII art (indented)
             if (!string.IsNullOrWhiteSpace(art))
             {
                 foreach (var line in art.Split('\n'))
@@ -89,7 +87,6 @@ public sealed class ForecastRenderer : IForecastRenderer
                 }
             }
 
-            // Weather details
             var high = ColouriseValue(day.TemperatureMax, units.Temperature, colourEnabled);
             var low = ColouriseValue(day.TemperatureMin, units.Temperature, colourEnabled);
             _console.WriteLine($"│");
@@ -97,14 +94,12 @@ public sealed class ForecastRenderer : IForecastRenderer
             _console.WriteLine($"│  Rain: {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
             _console.WriteLine($"│  Wind: {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
 
-            // Warning (only if present and meaningful)
-            if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase) &&
-                !warning.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
+            if (warning.IsActive)
             {
-                _console.WriteLine($"│  !  {warning}");
+                _console.WriteLine($"│  !  {warning.Text}");
             }
 
-            _console.WriteLine($"└──────────────────────────────────────");
+            _console.WriteLine(BuildBoxBottom());
             _console.WriteLine();
         }
     }
@@ -139,13 +134,12 @@ public sealed class ForecastRenderer : IForecastRenderer
         }
 
         var dayHeader = FormatDayHeader(today.Date);
-        _console.WriteLine($"┌─ {dayHeader} ─────────────────────────");
+        _console.WriteLine(BuildBoxTop(dayHeader));
 
         var warning = GetWarning(forecast, today.Date);
-        if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase) &&
-            !warning.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
+        if (warning.IsActive)
         {
-            _console.WriteLine($"│  !  {warning}");
+            _console.WriteLine($"│  !  {warning.Text}");
         }
 
         foreach (var segment in today.Segments)
@@ -171,7 +165,7 @@ public sealed class ForecastRenderer : IForecastRenderer
             _console.WriteLine($"│   Wind: {FormatValue(segment.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(segment.WindGustsMax)}{units.WindGusts})");
         }
 
-        _console.WriteLine($"└──────────────────────────────────────");
+        _console.WriteLine(BuildBoxBottom());
     }
 
     private string BuildArt(string key, AnsiColour artColour, bool showArt, bool colourEnabled)
@@ -181,7 +175,7 @@ public sealed class ForecastRenderer : IForecastRenderer
             return _colouriser.Apply($"[ {key.Replace('_', ' ').ToUpperInvariant()} ]", artColour, colourEnabled);
         }
 
-        var art = _asciiArt.GetArt(key, GetTerminalWidth());
+        var art = _asciiArt.GetArt(key, _terminalInfo.Width);
         if (string.IsNullOrWhiteSpace(art))
         {
             return _colouriser.Apply($"[ {key.Replace('_', ' ').ToUpperInvariant()} ]", artColour, colourEnabled);
@@ -197,15 +191,8 @@ public sealed class ForecastRenderer : IForecastRenderer
         return _colouriser.Apply(formatted, colour, colourEnabled);
     }
 
-    private static string GetWarning(Forecast forecast, string date)
-    {
-        if (forecast.WarningsByDate.TryGetValue(date, out var warning))
-        {
-            return warning;
-        }
-
-        return "none";
-    }
+    private static WarningResult GetWarning(Forecast forecast, string date) =>
+        forecast.WarningsByDate.TryGetValue(date, out var warning) ? warning : WarningResult.None;
 
     private static string FormatValue(double value)
     {
@@ -227,7 +214,7 @@ public sealed class ForecastRenderer : IForecastRenderer
         var warning = GetWarning(forecast, day.Date);
         var dayHeader = FormatDayHeader(day.Date);
 
-        _console.WriteLine($"┌─ {dayHeader} ─────────────────────────");
+        _console.WriteLine(BuildBoxTop(dayHeader));
         _console.WriteLine($"│  {descriptor.Description}");
 
         if (!string.IsNullOrWhiteSpace(art))
@@ -245,22 +232,12 @@ public sealed class ForecastRenderer : IForecastRenderer
         _console.WriteLine($"│  Rain: {FormatValue(day.PrecipitationSum)}{units.Precipitation}");
         _console.WriteLine($"│  Wind: {FormatValue(day.WindSpeedMax)}{units.WindSpeed} (gusts {FormatValue(day.WindGustsMax)}{units.WindGusts})");
 
-        if (!string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase) &&
-            !warning.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
+        if (warning.IsActive)
         {
-            _console.WriteLine($"│  !  {warning}");
+            _console.WriteLine($"│  !  {warning.Text}");
         }
 
-        _console.WriteLine($"└──────────────────────────────────────");
-    }
-
-    private static string FormatDateWithDayOfWeek(string date)
-    {
-        if (DateTime.TryParse(date, out var dt))
-        {
-            return $"{date} ({dt.DayOfWeek})";
-        }
-        return date;
+        _console.WriteLine(BuildBoxBottom());
     }
 
     private static string FormatDayHeader(string date)
@@ -280,22 +257,6 @@ public sealed class ForecastRenderer : IForecastRenderer
         return date;
     }
 
-    private static int? GetTerminalWidth()
-    {
-        try
-        {
-            var width = Console.WindowWidth;
-            // Return default width if detection failed or returned invalid value
-            return width > 0 ? width : 80;
-        }
-        catch
-        {
-            // Default to 80 columns when terminal width cannot be determined
-            // This ensures ASCII art works in non-interactive environments
-            return 80;
-        }
-    }
-
     public void RenderHourly(Forecast forecast, bool showArt, bool useColour)
     {
         var colourEnabled = _colouriser.ShouldUseColour(useColour);
@@ -312,19 +273,15 @@ public sealed class ForecastRenderer : IForecastRenderer
 
         var dayHeader = FormatDayHeader(hourly.Date);
         _console.WriteLine($"24-Hour Forecast · {dayHeader}");
-        _console.WriteLine(new string('─', 50));
+        _console.WriteLine(new string('─', BoxWidth));
         _console.WriteLine();
 
-        // Check for warnings - only show if there are real warnings
-        if (forecast.WarningsByDate.TryGetValue(hourly.Date, out var warning) &&
-            !string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase) &&
-            !warning.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
+        if (forecast.WarningsByDate.TryGetValue(hourly.Date, out var warning) && warning.IsActive)
         {
-            _console.WriteLine($"  ! Warning: {warning}");
+            _console.WriteLine($"  ! Warning: {warning.Text}");
             _console.WriteLine();
         }
 
-        // Group hours into blocks of 6 for readability
         var hourBlocks = new[] { (0, 5, "Night"), (6, 11, "Morning"), (12, 17, "Afternoon"), (18, 23, "Evening") };
 
         foreach (var (startHour, endHour, blockName) in hourBlocks)
@@ -332,7 +289,7 @@ public sealed class ForecastRenderer : IForecastRenderer
             var blockHours = hourly.Hours.Where(h => h.Hour >= startHour && h.Hour <= endHour).ToList();
             if (blockHours.Count == 0) continue;
 
-            _console.WriteLine($"┌─ {blockName.ToUpperInvariant()} ─────────────────────────────────");
+            _console.WriteLine(BuildBoxTop(blockName.ToUpperInvariant()));
 
             foreach (var hour in blockHours)
             {
@@ -349,8 +306,19 @@ public sealed class ForecastRenderer : IForecastRenderer
                 _console.WriteLine($"│  {hour.TimeLabel}  {temp,8}  {weatherShort}  Rain: {precipValue,4}{units.Precipitation}  Wind: {windValue}{units.WindSpeed}");
             }
 
-            _console.WriteLine($"└──────────────────────────────────────────────────");
+            _console.WriteLine(BuildBoxBottom());
             _console.WriteLine();
         }
     }
+
+    private int BoxWidth => Math.Clamp(_terminalInfo.Width - 2, 42, 78);
+
+    private string BuildBoxTop(string header)
+    {
+        var prefix = $"┌─ {header} ";
+        var trailing = BoxWidth - prefix.Length;
+        return trailing > 0 ? prefix + new string('─', trailing) : prefix;
+    }
+
+    private string BuildBoxBottom() => "└" + new string('─', BoxWidth - 1);
 }

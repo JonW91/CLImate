@@ -139,21 +139,16 @@ public sealed class TableRenderer : ITableRenderer
         }).ToList();
         _console.WriteLine(BuildRow(wind, '│'));
 
-        // Warnings row (only if there are real warnings)
         var hasWarnings = days.Any(d =>
-            forecast.WarningsByDate.TryGetValue(d.Date, out var warning)
-            && !string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase)
-            && !warning.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase));
+            forecast.WarningsByDate.TryGetValue(d.Date, out var w) && w.IsActive);
         if (hasWarnings)
         {
             _console.WriteLine(BuildHorizontalBorder(days.Count, columnWidth, '├', '┼', '┤'));
             var warnings = days.Select(d =>
             {
-                if (forecast.WarningsByDate.TryGetValue(d.Date, out var warning) &&
-                    !string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase) &&
-                    !warning.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
+                if (forecast.WarningsByDate.TryGetValue(d.Date, out var w) && w.IsActive)
                 {
-                    var truncated = TruncateText(warning, columnWidth - 4);
+                    var truncated = TruncateText(w.Text, columnWidth - 4);
                     return CenterText($"! {truncated}", columnWidth);
                 }
                 return CenterText("—", columnWidth);
@@ -359,12 +354,9 @@ public sealed class TableRenderer : ITableRenderer
         _console.WriteLine($"Today's Forecast · {FormatTodayDate(today.Date)}");
         _console.WriteLine();
 
-        // Check for warnings - only show if there are real warnings
-        if (forecast.WarningsByDate.TryGetValue(today.Date, out var warning) &&
-            !string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase) &&
-            !warning.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
+        if (forecast.WarningsByDate.TryGetValue(today.Date, out var warning) && warning.IsActive)
         {
-            _console.WriteLine($"  ! Warning: {warning}");
+            _console.WriteLine($"  ! Warning: {warning.Text}");
             _console.WriteLine();
         }
 
@@ -489,12 +481,9 @@ public sealed class TableRenderer : ITableRenderer
         _console.WriteLine($"Today's Forecast · {FormatTodayDate(day.Date)}");
         _console.WriteLine();
 
-        // Check for warnings - only show if there are real warnings
-        if (forecast.WarningsByDate.TryGetValue(day.Date, out var warning) &&
-            !string.Equals(warning, "none", StringComparison.OrdinalIgnoreCase) &&
-            !warning.StartsWith("no warnings available", StringComparison.OrdinalIgnoreCase))
+        if (forecast.WarningsByDate.TryGetValue(day.Date, out var warning) && warning.IsActive)
         {
-            _console.WriteLine($"  ! Warning: {warning}");
+            _console.WriteLine($"  ! Warning: {warning.Text}");
             _console.WriteLine();
         }
 

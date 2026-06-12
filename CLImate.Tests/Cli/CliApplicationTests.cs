@@ -20,6 +20,7 @@ public sealed class CliApplicationTests
     private readonly IForecastRenderer _forecastRenderer;
     private readonly IWeatherWarningsService _warningsService;
     private readonly ITerminalInfo _terminalInfo;
+    private readonly IConfigurationService _configService;
     private readonly CliApplication _app;
 
     private static readonly ForecastUnits DefaultUnits = new("°C", "mm", "km/h", "km/h");
@@ -41,12 +42,15 @@ public sealed class CliApplicationTests
         _forecastRenderer = A.Fake<IForecastRenderer>();
         _warningsService = A.Fake<IWeatherWarningsService>();
         _terminalInfo = A.Fake<ITerminalInfo>();
+        _configService = A.Fake<IConfigurationService>();
+
+        A.CallTo(() => _configService.GetConfig()).Returns(new ClimateConfig());
 
         _app = new CliApplication(
             _console, _optionsResolver, _help,
             _geocodingService, _forecastService,
             _locationSelector, _locationFormatter, _locationInputParser,
-            _forecastRenderer, _warningsService, _terminalInfo);
+            _forecastRenderer, _warningsService, _terminalInfo, _configService);
     }
 
     private void SetupResolveSuccess(CliOptions options) =>

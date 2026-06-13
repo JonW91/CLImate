@@ -20,9 +20,9 @@ public sealed class WeatherWarningsServiceTests
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "US", dates, CancellationToken.None);
 
         Assert.Equal(3, result.Count);
-        Assert.Equal("none", result["2026-02-01"]);
-        Assert.Equal("none", result["2026-02-02"]);
-        Assert.Equal("none", result["2026-02-03"]);
+        Assert.Equal(WarningStatus.None, result["2026-02-01"].Status);
+        Assert.Equal(WarningStatus.None, result["2026-02-02"].Status);
+        Assert.Equal(WarningStatus.None, result["2026-02-03"].Status);
     }
 
     [Fact]
@@ -42,9 +42,10 @@ public sealed class WeatherWarningsServiceTests
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "US", dates, CancellationToken.None);
 
-        Assert.Equal("none", result["2026-02-01"]);
-        Assert.Equal("Heavy rain", result["2026-02-02"]);
-        Assert.Equal("none", result["2026-02-03"]);
+        Assert.False(result["2026-02-01"].IsActive);
+        Assert.True(result["2026-02-02"].IsActive);
+        Assert.Equal("Heavy rain", result["2026-02-02"].Text);
+        Assert.False(result["2026-02-03"].IsActive);
     }
 
     [Fact]
@@ -64,11 +65,11 @@ public sealed class WeatherWarningsServiceTests
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "US", dates, CancellationToken.None);
 
-        Assert.Equal("none", result["2026-02-01"]);
-        Assert.Equal("Storm", result["2026-02-02"]);
-        Assert.Equal("Storm", result["2026-02-03"]);
-        Assert.Equal("Storm", result["2026-02-04"]);
-        Assert.Equal("none", result["2026-02-05"]);
+        Assert.False(result["2026-02-01"].IsActive);
+        Assert.Equal("Storm", result["2026-02-02"].Text);
+        Assert.Equal("Storm", result["2026-02-03"].Text);
+        Assert.Equal("Storm", result["2026-02-04"].Text);
+        Assert.False(result["2026-02-05"].IsActive);
     }
 
     [Fact]
@@ -89,9 +90,10 @@ public sealed class WeatherWarningsServiceTests
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "US", dates, CancellationToken.None);
 
-        Assert.Contains("Heavy rain", result["2026-02-02"]);
-        Assert.Contains("Strong winds", result["2026-02-02"]);
-        Assert.Contains(";", result["2026-02-02"]);
+        Assert.True(result["2026-02-02"].IsActive);
+        Assert.Contains("Heavy rain", result["2026-02-02"].Text);
+        Assert.Contains("Strong winds", result["2026-02-02"].Text);
+        Assert.Contains(";", result["2026-02-02"].Text);
     }
 
     [Fact]
@@ -111,8 +113,8 @@ public sealed class WeatherWarningsServiceTests
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "US", dates, CancellationToken.None);
 
-        Assert.Equal("none", result["2026-02-01"]);
-        Assert.Equal("none", result["2026-02-02"]);
+        Assert.False(result["2026-02-01"].IsActive);
+        Assert.False(result["2026-02-02"].IsActive);
     }
 
     [Fact]
@@ -132,25 +134,24 @@ public sealed class WeatherWarningsServiceTests
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "US", dates, CancellationToken.None);
 
-        Assert.Equal("none", result["2026-02-01"]);
-        Assert.Equal("Flash event", result["2026-02-02"]);
-        Assert.Equal("none", result["2026-02-03"]);
+        Assert.False(result["2026-02-01"].IsActive);
+        Assert.Equal("Flash event", result["2026-02-02"].Text);
+        Assert.False(result["2026-02-03"].IsActive);
     }
 
     [Fact]
-    public async Task GetDailyWarningsAsync_NonCoveredCountry_ReturnsRegionalUnavailableMessage()
+    public async Task GetDailyWarningsAsync_NonCoveredCountry_ReturnsRegionalUnavailable()
     {
         var nws = A.Fake<INwsWarningsClient>();
         var meteo = A.Fake<IMeteoalarmWarningsClient>();
-        A.CallTo(() => nws.GetWarningsAsync(A<double>._, A<double>._, A<CancellationToken>._))
-            .Returns(Task.FromResult<IReadOnlyList<WeatherWarning>>(Array.Empty<WeatherWarning>()));
 
         var service = new WeatherWarningsService(nws, meteo);
         var dates = new List<string> { "2026-02-01" };
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "IN", dates, CancellationToken.None);
 
-        Assert.Equal("no warnings available for this region", result["2026-02-01"]);
+        Assert.Equal(WarningStatus.RegionalUnavailable, result["2026-02-01"].Status);
+        Assert.False(result["2026-02-01"].IsActive);
     }
 
     [Fact]
@@ -170,6 +171,6 @@ public sealed class WeatherWarningsServiceTests
 
         var result = await service.GetDailyWarningsAsync(51.5, -0.1, "DE", dates, CancellationToken.None);
 
-        Assert.Equal("EU alert", result["2026-02-02"]);
+        Assert.Equal("EU alert", result["2026-02-02"].Text);
     }
 }

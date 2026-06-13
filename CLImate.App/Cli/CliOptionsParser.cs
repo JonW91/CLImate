@@ -21,130 +21,106 @@ public sealed class CliOptionsParser : ICliOptionsParser
 
     public CliOptionsParseResult Parse(string[] args)
     {
+        // Intercept "config" as a subcommand before normal option parsing.
+        if (args.Length > 0 && string.Equals(args[0], "config", StringComparison.OrdinalIgnoreCase))
+        {
+            return ParseConfigSubcommand(args[1..]);
+        }
+
         var options = new CliOptions();
         var locationParts = new List<string>();
 
         for (var i = 0; i < args.Length; i++)
         {
             var arg = args[i];
-            if (arg is "-h" or "--help")
-                {
+
+            // Normalise "--option=value" into option name + inline value.
+            string name = arg;
+            string? inlineValue = null;
+            var equalsIndex = arg.StartsWith("--", StringComparison.Ordinal) ? arg.IndexOf('=') : -1;
+            if (equalsIndex > 0)
+            {
+                name = arg[..equalsIndex];
+                inlineValue = arg[(equalsIndex + 1)..];
+            }
+
+            switch (name)
+            {
+                case "-h" or "--help":
                     options.ShowHelp = true;
                     return CliOptionsParseResult.Success(options);
-                }
 
-                if (arg is "-v" or "--version")
-                {
+                case "-v" or "--version":
                     options.ShowVersion = true;
                     return CliOptionsParseResult.Success(options);
+
+                case "-u" or "--units":
+                {
+                    var value = inlineValue ?? NextValue(args, ref i);
+                    if (value is null)
+                    {
+                        return CliOptionsParseResult.Failure("Missing value for --units.");
+                    }
+
+                    var parsedUnits = TryParseUnits(value);
+                    if (parsedUnits is null)
+                    {
+                        return CliOptionsParseResult.Failure($"Invalid units: '{value}'. Use 'metric' or 'imperial'.");
+                    }
+
+                    options.Units = parsedUnits.Value;
+                    options.UnitsSetExplicitly = true;
+                    continue;
                 }
 
-            if (arg is "--units" or "-u")
-            {
-                if (i + 1 >= args.Length)
+                case "-c" or "--country":
                 {
-                    return CliOptionsParseResult.Failure("Missing value for --units.");
+                    var value = inlineValue ?? NextValue(args, ref i);
+                    if (value is null)
+                    {
+                        return CliOptionsParseResult.Failure("Missing value for --country.");
+                    }
+
+                    var normalised = _locationInputParser.NormaliseCountryCode(value);
+                    if (!_countryCodeCatalogue.IsValidCode(normalised ?? value))
+                    {
+                        return CliOptionsParseResult.Failure($"Invalid country code: '{value}'. Use a 2-letter ISO 3166-1 code (e.g., GB, US, DE).");
+                    }
+
+                    options.CountryCode = normalised ?? value.ToUpperInvariant();
+                    continue;
                 }
 
-                var unitsValue = args[++i];
-                var parsedUnits = TryParseUnits(unitsValue);
-                if (parsedUnits is null)
-                {
-                    return CliOptionsParseResult.Failure($"Invalid units: '{unitsValue}'. Use 'metric' or 'imperial'.");
-                }
-
-                options.Units = parsedUnits.Value;
-                continue;
-            }
-
-            if (arg is "--country" or "-c")
-            {
-                if (i + 1 >= args.Length)
-                {
-                    return CliOptionsParseResult.Failure("Missing value for --country.");
-                }
-
-                var countryValue = args[++i];
-                var normalised = _locationInputParser.NormaliseCountryCode(countryValue);
-                if (!_countryCodeCatalogue.IsValidCode(normalised ?? countryValue))
-                {
-                    return CliOptionsParseResult.Failure($"Invalid country code: '{countryValue}'. Use a 2-letter ISO 3166-1 code (e.g., GB, US, DE).");
-                }
-                options.CountryCode = normalised ?? countryValue.ToUpperInvariant();
-                continue;
-            }
-
-                if (arg is "--no-art")
-                {
+                case "--no-art":
                     options.ShowArt = false;
+                    options.ShowArtSetExplicitly = true;
                     continue;
-                }
 
-                if (arg is "--no-colour")
-                {
+                case "--no-colour":
                     options.UseColour = false;
+                    options.UseColourSetExplicitly = true;
                     continue;
-                }
 
-                if (arg is "--colour")
-                {
+                case "--colour":
                     options.UseColour = true;
+                    options.UseColourSetExplicitly = true;
                     continue;
-                }
 
-            if (arg is "--today" or "-t")
-            {
-                options.ForecastMode = ForecastMode.Today;
-                continue;
-            }
+                case "-t" or "--today":
+                    options.ForecastMode = ForecastMode.Today;
+                    continue;
 
-            if (arg is "--hourly")
-            {
-                options.ForecastMode = ForecastMode.Hourly;
-                continue;
-            }
+                case "--hourly":
+                    options.ForecastMode = ForecastMode.Hourly;
+                    continue;
 
-            if (arg is "--horizontal" or "-H")
-            {
-                options.Layout = LayoutMode.Horizontal;
-                continue;
-            }
+                case "-H" or "--horizontal":
+                    options.Layout = LayoutMode.Horizontal;
+                    continue;
 
-            if (arg is "--vertical" or "-V")
-            {
-                options.Layout = LayoutMode.Vertical;
-                continue;
-            }
-
-            if (arg is "--diagnostics" or "-d")
-            {
-                options.Diagnostics = true;
-                continue;
-            }
-
-            if (arg.StartsWith("--units=", StringComparison.OrdinalIgnoreCase))
-            {
-                var unitsValue = arg.Substring("--units=".Length);
-                var parsedUnits = TryParseUnits(unitsValue);
-                if (parsedUnits is null)
-                {
-                    return CliOptionsParseResult.Failure($"Invalid units: '{unitsValue}'. Use 'metric' or 'imperial'.");
-                }
-
-                options.Units = parsedUnits.Value;
-                continue;
-            }
-
-            if (arg.StartsWith("--country=", StringComparison.OrdinalIgnoreCase))
-            {
-                var countryValue = arg.Substring("--country=".Length);
-                var normalised = _locationInputParser.NormaliseCountryCode(countryValue);
-                if (!_countryCodeCatalogue.IsValidCode(normalised ?? countryValue))
-                {
-                    return CliOptionsParseResult.Failure($"Invalid country code: '{countryValue}'. Use a 2-letter ISO 3166-1 code (e.g., GB, US, DE).");
-                }
-                options.CountryCode = normalised ?? countryValue.ToUpperInvariant();
-                continue;
+                case "-V" or "--vertical":
+                    options.Layout = LayoutMode.Vertical;
+                    continue;
             }
 
             if (arg.StartsWith("-", StringComparison.Ordinal))
@@ -161,6 +137,53 @@ public sealed class CliOptionsParser : ICliOptionsParser
         }
 
         return CliOptionsParseResult.Success(options);
+    }
+
+    private static CliOptionsParseResult ParseConfigSubcommand(string[] args)
+    {
+        if (args.Length == 0 || string.Equals(args[0], "show", StringComparison.OrdinalIgnoreCase))
+        {
+            return CliOptionsParseResult.Success(new CliOptions
+            {
+                Config = new ConfigSubcommand { Action = "show" }
+            });
+        }
+
+        var action = args[0].ToLowerInvariant();
+
+        if (action == "set")
+        {
+            if (args.Length < 3)
+                return CliOptionsParseResult.Failure("Usage: climate config set <key> <value>  (keys: country, units, art, colour)");
+
+            return CliOptionsParseResult.Success(new CliOptions
+            {
+                Config = new ConfigSubcommand { Action = "set", Key = args[1].ToLowerInvariant(), Value = args[2] }
+            });
+        }
+
+        if (action == "add-favourite")
+        {
+            if (args.Length < 2)
+                return CliOptionsParseResult.Failure("Usage: climate config add-favourite <name>");
+
+            return CliOptionsParseResult.Success(new CliOptions
+            {
+                Config = new ConfigSubcommand { Action = "add-favourite", Value = string.Join(" ", args[1..]) }
+            });
+        }
+
+        return CliOptionsParseResult.Failure($"Unknown config action '{args[0]}'. Try: show, set, add-favourite.");
+    }
+
+    private static string? NextValue(string[] args, ref int i)
+    {
+        if (i + 1 >= args.Length)
+        {
+            return null;
+        }
+
+        return args[++i];
     }
 
     private static Units? TryParseUnits(string? value)

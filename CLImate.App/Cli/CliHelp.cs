@@ -38,5 +38,13 @@ public sealed class CliHelp : ICliHelp
         _console.WriteLine("  --colour                        Force ANSI colours on");
         _console.WriteLine("  -h, --help                      Show this help message");
         _console.WriteLine("  -v, --version                   Show version information");
+        _console.WriteLine();
+        _console.WriteLine("Config commands:");
+        _console.WriteLine("  climate config show                      Print current config");
+        _console.WriteLine("  climate config set country <code>        Set default country (e.g. GB)");
+        _console.WriteLine("  climate config set units <metric|imperial>  Set default units");
+        _console.WriteLine("  climate config set art <on|off>          Enable/disable ASCII art");
+        _console.WriteLine("  climate config set colour <on|off>       Enable/disable colour");
+        _console.WriteLine("  climate config add-favourite <name>      Geocode and save a location");
     }
 }

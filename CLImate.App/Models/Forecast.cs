@@ -7,22 +7,22 @@ public sealed class Forecast
         ForecastUnits units,
         TodayForecast? today = null,
         HourlyForecast? hourly = null,
-        IReadOnlyDictionary<string, string>? warningsByDate = null)
+        IReadOnlyDictionary<string, WarningResult>? warningsByDate = null)
     {
         Days = days;
         Units = units;
         Today = today;
         Hourly = hourly;
-        WarningsByDate = warningsByDate ?? new Dictionary<string, string>();
+        WarningsByDate = warningsByDate ?? new Dictionary<string, WarningResult>();
     }
 
     public IReadOnlyList<DailyForecast> Days { get; }
     public ForecastUnits Units { get; }
     public TodayForecast? Today { get; }
     public HourlyForecast? Hourly { get; }
-    public IReadOnlyDictionary<string, string> WarningsByDate { get; }
+    public IReadOnlyDictionary<string, WarningResult> WarningsByDate { get; }
 
-    public Forecast WithWarnings(IReadOnlyDictionary<string, string> warningsByDate)
+    public Forecast WithWarnings(IReadOnlyDictionary<string, WarningResult> warningsByDate)
         => new Forecast(Days, Units, Today, Hourly, warningsByDate);
 }
 

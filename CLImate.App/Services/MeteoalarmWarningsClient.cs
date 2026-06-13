@@ -31,12 +31,12 @@ public sealed class MeteoalarmWarningsClient : IMeteoalarmWarningsClient
             var results = new List<WeatherWarning>();
             foreach (var warning in warningsEl.EnumerateArray())
             {
-                var eventName = GetString(warning, "event") ?? GetString(warning, "headline") ?? "Weather alert";
-                var severity = GetString(warning, "severity");
+                var eventName = WarningJsonHelpers.GetString(warning, "event") ?? WarningJsonHelpers.GetString(warning, "headline") ?? "Weather alert";
+                var severity = WarningJsonHelpers.GetString(warning, "severity");
                 var summary = string.IsNullOrWhiteSpace(severity) ? eventName : $"{eventName} ({severity})";
 
-                var starts = ParseDate(warning, "start") ?? ParseDate(warning, "onset");
-                var ends = ParseDate(warning, "end") ?? ParseDate(warning, "expires");
+                var starts = WarningJsonHelpers.ParseDate(warning, "start", "onset");
+                var ends = WarningJsonHelpers.ParseDate(warning, "end", "expires");
 
                 results.Add(new WeatherWarning(summary, starts, ends));
             }
@@ -51,38 +51,10 @@ public sealed class MeteoalarmWarningsClient : IMeteoalarmWarningsClient
         {
             return Array.Empty<WeatherWarning>();
         }
-    }
-
-    private static string? GetString(JsonElement element, string name)
-    {
-        if (element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String)
+        catch (WeatherApiException)
         {
-            var text = value.GetString();
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                return text;
-            }
+            // Warnings are best-effort; never let a failing alerts feed block the forecast.
+            return Array.Empty<WeatherWarning>();
         }
-
-        return null;
-    }
-
-    private static DateTimeOffset? ParseDate(JsonElement element, params string[] names)
-    {
-        foreach (var name in names)
-        {
-            var raw = GetString(element, name);
-            if (string.IsNullOrWhiteSpace(raw))
-            {
-                continue;
-            }
-
-            if (DateTimeOffset.TryParse(raw, out var dto))
-            {
-                return dto;
-            }
-        }
-
-        return null;
     }
 }

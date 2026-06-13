@@ -5,6 +5,7 @@ public interface ITerminalInfo
     int Width { get; }
     int Height { get; }
     bool IsRedirected { get; }
+    bool IsInputRedirected { get; }
 }
 
 public sealed class TerminalInfo : ITerminalInfo
@@ -49,6 +50,21 @@ public sealed class TerminalInfo : ITerminalInfo
             try
             {
                 return Console.IsOutputRedirected;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+
+    public bool IsInputRedirected
+    {
+        get
+        {
+            try
+            {
+                return Console.IsInputRedirected;
             }
             catch
             {

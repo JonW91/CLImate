@@ -194,9 +194,11 @@ public sealed class TableRenderer : ITableRenderer
             for (var dayIdx = 0; dayIdx < days.Count; dayIdx++)
             {
                 var lines = artLines[dayIdx];
-                var line = lineIdx < lines.Length ? lines[lineIdx].TrimEnd() : "";
+                var line = lineIdx < lines.Length ? lines[lineIdx] : "";
 
-                // Center the art line in the column, accounting for ANSI codes
+                // Center the art line in the column, accounting for ANSI codes.
+                // Keep trailing whitespace so every row's centre column matches the
+                // JSON's pre-padded art width — trimming caused vertical-ray drift.
                 var visibleLen = GetVisibleLength(line);
                 rowCells.Add(CenterTextWithAnsi(line, columnWidth, visibleLen));
             }
@@ -456,7 +458,7 @@ public sealed class TableRenderer : ITableRenderer
             for (var segIdx = 0; segIdx < segments.Count; segIdx++)
             {
                 var lines = artLines[segIdx];
-                var line = lineIdx < lines.Length ? lines[lineIdx].TrimEnd() : "";
+                var line = lineIdx < lines.Length ? lines[lineIdx] : "";
                 var visibleLen = GetVisibleLength(line);
                 rowCells.Add(CenterTextWithAnsi(line, columnWidth, visibleLen));
             }

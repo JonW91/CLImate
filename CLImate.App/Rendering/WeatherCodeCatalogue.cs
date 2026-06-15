@@ -12,7 +12,8 @@ public sealed class WeatherCodeCatalogue : IWeatherCodeCatalogue
         return code switch
         {
             0 => new WeatherDescriptor("Clear sky", "clear", AnsiColour.Yellow),
-            1 or 2 => new WeatherDescriptor("Mainly clear, partly cloudy", "partly_cloudy", AnsiColour.Yellow),
+            1 => new WeatherDescriptor("Mainly clear", "partly_cloudy", AnsiColour.Yellow),
+            2 => new WeatherDescriptor("Partly cloudy", "partly_cloudy", AnsiColour.Yellow),
             3 => new WeatherDescriptor("Overcast", "overcast", AnsiColour.Grey),
             45 or 48 => new WeatherDescriptor("Fog", "fog", AnsiColour.Grey),
             51 or 53 or 55 => new WeatherDescriptor("Drizzle", "drizzle", AnsiColour.Blue),

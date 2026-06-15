@@ -25,7 +25,7 @@ public sealed class WeatherCodeCatalogue : IWeatherCodeCatalogue
             80 or 81 or 82 => new WeatherDescriptor("Rain showers", "rain_showers", AnsiColour.DarkGrey),
             85 or 86 => new WeatherDescriptor("Snow showers", "snow_showers", AnsiColour.White),
             95 => new WeatherDescriptor("Thunderstorm", "thunderstorm", AnsiColour.DarkGrey),
-            96 or 99 => new WeatherDescriptor("Thunderstorm with hail", "thunderstorm_hail", AnsiColour.DarkGrey),
+            96 or 99 => new WeatherDescriptor("Hailstorm", "thunderstorm_hail", AnsiColour.DarkGrey),
             _ => new WeatherDescriptor("Unknown", "unknown", AnsiColour.Default)
         };
     }

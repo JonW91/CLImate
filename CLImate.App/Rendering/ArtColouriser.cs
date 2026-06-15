@@ -10,7 +10,7 @@ public interface IArtColouriser
 public sealed class ArtColouriser : IArtColouriser
 {
     private static readonly HashSet<char> CloudChars = new(new[] { '.', '-', '(', ')', '_' });
-    private static readonly HashSet<char> SunChars = new(new[] { 'o', '\\', '/', '|', '*' });
+    private static readonly HashSet<char> SunChars = new(new[] { 'o', '\\', '/', '|', '*', '~' });
     private static readonly HashSet<char> RainChars = new(new[] { '/' });
     private static readonly HashSet<char> DrizzleChars = new(new[] { '\'' });
     private static readonly HashSet<char> SnowChars = new(new[] { '*' });

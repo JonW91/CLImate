@@ -144,12 +144,15 @@ fi
 echo "🚀 Installing CLImate to $INSTALL_DIR..."
 install -m 0755 "$TMP_DIR/$BIN_NAME" "$INSTALL_DIR/$BIN_NAME"
 
-# Install assets (ascii-art.json, country-codes.json) next to the binary
+# Install assets (ascii-art.json, country-codes.json) next to the binary.
+# Globbing is disabled by `set -f`, so temporarily re-enable it for this loop.
 if [ -d "$TMP_DIR/Assets" ]; then
   mkdir -p "$INSTALL_DIR/Assets"
+  set +f
   for f in "$TMP_DIR"/Assets/*; do
     [ -f "$f" ] && install -m 0644 "$f" "$INSTALL_DIR/Assets/"
   done
+  set -f
 fi
 
 # Check if directory is in PATH

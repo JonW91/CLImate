@@ -144,6 +144,14 @@ fi
 echo "🚀 Installing CLImate to $INSTALL_DIR..."
 install -m 0755 "$TMP_DIR/$BIN_NAME" "$INSTALL_DIR/$BIN_NAME"
 
+# Install assets (ascii-art.json, country-codes.json) next to the binary
+if [ -d "$TMP_DIR/Assets" ]; then
+  mkdir -p "$INSTALL_DIR/Assets"
+  for f in "$TMP_DIR"/Assets/*; do
+    [ -f "$f" ] && install -m 0644 "$f" "$INSTALL_DIR/Assets/"
+  done
+fi
+
 # Check if directory is in PATH
 if ! echo "$PATH" | tr ':' '\n' | grep -qx "$INSTALL_DIR"; then
   echo ""

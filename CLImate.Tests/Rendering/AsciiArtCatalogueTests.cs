@@ -43,7 +43,7 @@ public sealed class AsciiArtCatalogueTests
         // Should return non-empty art if file exists
         // This test depends on the ascii-art.json file being in the output directory
         // In CI, this might return empty if the file isn't copied
-        Assert.True(result == string.Empty || result.Contains("{(@)}"));
+        Assert.True(result == string.Empty || result.Contains("88888"));
     }
 
     [Theory]
@@ -54,7 +54,7 @@ public sealed class AsciiArtCatalogueTests
     {
         var result = _catalogue.GetArt("clear", width);
 
-        Assert.True(result == string.Empty || result.Contains("{(@)}"));
+        Assert.True(result == string.Empty || result.Contains("88888"));
     }
 
     [Theory]
@@ -65,7 +65,7 @@ public sealed class AsciiArtCatalogueTests
     {
         var result = _catalogue.GetArt("clear", width);
 
-        Assert.True(result == string.Empty || result.Contains("{(@)}"));
+        Assert.True(result == string.Empty || result.Contains("88888"));
     }
 
     [Fact]

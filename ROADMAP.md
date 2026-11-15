@@ -139,7 +139,7 @@ complete -W "$(climate --list-countries)" climate
 ## Phase 4: Extended Features (Priority: Low)
 
 ### 4.1 Forecast Options
-- [ ] Hourly forecasts (`climate --hourly London`)
+- [x] Hourly forecasts (`climate --hourly London`)
 - [ ] Extended range (14-day where available)
 - [ ] Historical weather lookup
 - [ ] Multiple locations comparison

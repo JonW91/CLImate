@@ -21,6 +21,7 @@ public sealed class CliApplicationTests
     private readonly IWeatherWarningsService _warningsService;
     private readonly ITerminalInfo _terminalInfo;
     private readonly IConfigurationService _configService;
+    private readonly IArtGallery _artGallery;
     private readonly CliApplication _app;
 
     private static readonly ForecastUnits DefaultUnits = new("°C", "mm", "km/h", "km/h");
@@ -43,6 +44,7 @@ public sealed class CliApplicationTests
         _warningsService = A.Fake<IWeatherWarningsService>();
         _terminalInfo = A.Fake<ITerminalInfo>();
         _configService = A.Fake<IConfigurationService>();
+        _artGallery = A.Fake<IArtGallery>();
 
         A.CallTo(() => _configService.GetConfig()).Returns(new ClimateConfig());
 
@@ -50,7 +52,7 @@ public sealed class CliApplicationTests
             _console, _optionsResolver, _help,
             _geocodingService, _forecastService,
             _locationSelector, _locationFormatter, _locationInputParser,
-            _forecastRenderer, _warningsService, _terminalInfo, _configService);
+            _forecastRenderer, _warningsService, _terminalInfo, _configService, _artGallery);
     }
 
     private void SetupResolveSuccess(CliOptions options) =>
@@ -97,6 +99,19 @@ public sealed class CliApplicationTests
 
         Assert.Equal(0, result);
         A.CallTo(() => _forecastService.GetForecastAsync(A<double>._, A<double>._, A<Units>._, A<CancellationToken>._))
+            .MustNotHaveHappened();
+    }
+
+    [Fact]
+    public async Task RunAsync_WithGalleryFlag_RendersGalleryWithoutFetchingWeather()
+    {
+        SetupResolveSuccess(new CliOptions { ShowGallery = true, UseColour = false });
+
+        var result = await _app.RunAsync(["--gallery"]);
+
+        Assert.Equal(0, result);
+        A.CallTo(() => _artGallery.Render(false)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _geocodingService.SearchAsync(A<string>._, A<string?>._, A<CancellationToken>._))
             .MustNotHaveHappened();
     }
 

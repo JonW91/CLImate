@@ -24,6 +24,7 @@ public sealed class CliApplication : ICliApplication
     private readonly IWeatherWarningsService _warningsService;
     private readonly ITerminalInfo _terminalInfo;
     private readonly IConfigurationService _configService;
+    private readonly IArtGallery _artGallery;
 
     public CliApplication(
         IConsoleIO console,
@@ -37,7 +38,8 @@ public sealed class CliApplication : ICliApplication
         IForecastRenderer forecastRenderer,
         IWeatherWarningsService warningsService,
         ITerminalInfo terminalInfo,
-        IConfigurationService configService)
+        IConfigurationService configService,
+        IArtGallery artGallery)
     {
         _console = console;
         _optionsResolver = optionsResolver;
@@ -51,6 +53,7 @@ public sealed class CliApplication : ICliApplication
         _warningsService = warningsService;
         _terminalInfo = terminalInfo;
         _configService = configService;
+        _artGallery = artGallery;
     }
 
     public async Task<int> RunAsync(string[] args, CancellationToken cancellationToken = default)
@@ -103,6 +106,12 @@ public sealed class CliApplication : ICliApplication
         if (options.ShowVersion)
         {
             PrintVersion();
+            return 0;
+        }
+
+        if (options.ShowGallery)
+        {
+            _artGallery.Render(options.UseColour);
             return 0;
         }
 

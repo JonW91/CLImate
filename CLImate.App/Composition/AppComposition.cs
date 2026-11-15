@@ -55,6 +55,7 @@ public static class AppComposition
         services.AddSingleton<ITemperatureColourScale, TemperatureColourScale>();
         services.AddSingleton<IWeatherCodeCatalogue, WeatherCodeCatalogue>();
         services.AddSingleton<ITableRenderer, TableRenderer>();
+        services.AddSingleton<IArtGallery, ArtGallery>();
         services.AddSingleton<IForecastRenderer, ForecastRenderer>();
         services.AddSingleton<ICliApplication, CliApplication>();
         services.AddSingleton<IConfigurationService, ConfigurationService>();

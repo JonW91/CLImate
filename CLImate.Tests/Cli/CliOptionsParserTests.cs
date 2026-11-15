@@ -162,6 +162,15 @@ public sealed class CliOptionsParserTests
     }
 
     [Fact]
+    public void Parse_WithGalleryFlag_SetsShowGallery()
+    {
+        var result = _parser.Parse(["--gallery"]);
+
+        Assert.True(result.IsValid);
+        Assert.True(result.Options.ShowGallery);
+    }
+
+    [Fact]
     public void Parse_WithHorizontalFlag_SetsHorizontalLayout()
     {
         var result = _parser.Parse(["--horizontal", "London"]);

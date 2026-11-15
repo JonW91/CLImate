@@ -8,6 +8,7 @@ public interface ITableRenderer
     void RenderHorizontalTable(Forecast forecast, bool showArt, bool useColour, int terminalWidth);
     void RenderTodayTable(Forecast forecast, bool showArt, bool useColour, int terminalWidth);
     bool CanRenderHorizontally(Forecast forecast, int terminalWidth);
+    bool FitsHorizontally(Forecast forecast, int terminalWidth);
     bool CanRenderTodayHorizontally(Forecast forecast, int terminalWidth);
 }
 
@@ -23,8 +24,10 @@ public sealed class TableRenderer : ITableRenderer
     private const int MinColumnWidth = 14;
     private const int ArtColumnWidth = 18;
     private const int BorderWidth = 1;
-    private const int MinWidthForHorizontal = 100;
-    private const int MinWidthForArtTable = 110;
+
+    // Column widths the daily table can use, widest first. The small art is
+    // 10 columns wide, so it fits in every one of them.
+    private static readonly int[] ColumnWidths = [ArtColumnWidth, 16, MinColumnWidth];
 
     public TableRenderer(
         IConsoleIO console,
@@ -53,6 +56,38 @@ public sealed class TableRenderer : ITableRenderer
         return terminalWidth >= requiredWidthWithArt;
     }
 
+    public bool FitsHorizontally(Forecast forecast, int terminalWidth)
+    {
+        return forecast.Days.Count > 0 && FitColumnWidth(forecast, terminalWidth) is not null;
+    }
+
+    /// <summary>
+    /// Widest column width whose table fits the terminal without wrapping and
+    /// still holds the longest temperature, rain and wind cell. Null if none does.
+    /// </summary>
+    private static int? FitColumnWidth(Forecast forecast, int terminalWidth)
+    {
+        var columns = forecast.Days.Count;
+        var units = forecast.Units;
+        var contentWidth = 0;
+        foreach (var d in forecast.Days)
+        {
+            var temp = $"{FormatValue(d.TemperatureMin)}{units.Temperature}/{FormatValue(d.TemperatureMax)}{units.Temperature}";
+            var rain = $"Rain: {FormatValue(d.PrecipitationSum)}{units.Precipitation}";
+            var wind = $"Wind: {FormatValue(d.WindSpeedMax)}{units.WindSpeed}";
+            contentWidth = Math.Max(contentWidth, Math.Max(temp.Length, Math.Max(rain.Length, wind.Length)));
+        }
+
+        foreach (var width in ColumnWidths)
+        {
+            var tableWidth = (columns * width) + (columns + 1) * BorderWidth;
+            if (width >= contentWidth && tableWidth <= terminalWidth)
+                return width;
+        }
+
+        return null;
+    }
+
     public void RenderHorizontalTable(Forecast forecast, bool showArt, bool useColour, int terminalWidth)
     {
         var colourEnabled = _colouriser.ShouldUseColour(useColour);
@@ -65,11 +100,11 @@ public sealed class TableRenderer : ITableRenderer
             return;
         }
 
-        // Determine if we have enough width for ASCII art in table
-        var requiredWidthWithArt = (days.Count * ArtColumnWidth) + days.Count + 1;
-        var useAsciiArt = showArt && terminalWidth >= requiredWidthWithArt;
-        var columnWidth = useAsciiArt ? ArtColumnWidth : Math.Max(MinColumnWidth, 16);
-        var totalWidth = (days.Count * columnWidth) + days.Count + 1;
+        // Narrow the columns before giving up on the art: one-line icons are
+        // only used when no column width fits the terminal at all.
+        var fittedWidth = FitColumnWidth(forecast, terminalWidth);
+        var useAsciiArt = showArt && fittedWidth is not null;
+        var columnWidth = fittedWidth ?? 16;
 
         _console.WriteLine();
         _console.WriteLine("7-Day Forecast:");
@@ -106,7 +141,7 @@ public sealed class TableRenderer : ITableRenderer
         var weatherDescs = days.Select(d =>
         {
             var descriptor = _weatherCodes.Describe(d.WeatherCode);
-            var desc = TruncateText(descriptor.Description, columnWidth - 2);
+            var desc = TruncateText(descriptor.Description, columnWidth);
             return CenterText(desc, columnWidth);
         }).ToList();
         _console.WriteLine(BuildRow(weatherDescs, '│'));
@@ -233,14 +268,16 @@ public sealed class TableRenderer : ITableRenderer
         // Universal ASCII icons that work on all terminals
         return artKey.ToLowerInvariant() switch
         {
-            "clear" or "clear_day" or "sunny" => @"\ | /  (O)  / | \",
+            "clear" or "clear_day" or "sunny" => "--(O)--",
             "clear_night" => "( C )",
             "partly_cloudy" or "partly_cloudy_day" => @"\|/ .--.",
             "partly_cloudy_night" => "C .--.",
-            "cloudy" or "overcast" => ".--. .--.  ",
+            "cloudy" or "overcast" => ".--. .--.",
             "fog" or "mist" => "- _ - _ -",
             "drizzle" or "light_rain" => ".--. ' '",
             "rain" or "moderate_rain" or "heavy_rain" => ".--. / / /",
+            "rain_showers" => ".--. /  /",
+            "snow_showers" => ".--. *  *",
             "freezing_rain" or "freezing_drizzle" => ".--. * / *",
             "snow" or "light_snow" or "heavy_snow" => ".--. * * *",
             "sleet" => ".--. /* /*",

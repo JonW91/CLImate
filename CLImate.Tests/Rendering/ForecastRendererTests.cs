@@ -92,10 +92,38 @@ public sealed class ForecastRendererTests
     public void RenderDaily_WithHorizontalLayoutForced_UsesTableRenderer()
     {
         var forecast = CreateForecast(dayCount: 7);
+        A.CallTo(() => _tableRenderer.FitsHorizontally(forecast, 120)).Returns(true);
 
         _renderer.RenderDaily(forecast, showArt: true, useColour: false, LayoutMode.Horizontal);
 
         A.CallTo(() => _tableRenderer.RenderHorizontalTable(forecast, true, false, 120))
+            .MustHaveHappened();
+    }
+
+    [Fact]
+    public void RenderDaily_WithHorizontalForcedButTooNarrow_FallsBackToListWithNote()
+    {
+        var forecast = CreateForecast(dayCount: 7);
+        A.CallTo(() => _tableRenderer.FitsHorizontally(forecast, 120)).Returns(false);
+
+        _renderer.RenderDaily(forecast, showArt: true, useColour: false, LayoutMode.Horizontal);
+
+        A.CallTo(() => _tableRenderer.RenderHorizontalTable(A<Forecast>._, A<bool>._, A<bool>._, A<int>._))
+            .MustNotHaveHappened();
+        A.CallTo(() => _console.WriteLine(A<string>.That.Contains("too narrow")))
+            .MustHaveHappened();
+    }
+
+    [Fact]
+    public void RenderDaily_WithHorizontalForcedAndRedirectedOutput_RendersFullWidthTable()
+    {
+        var forecast = CreateForecast(dayCount: 7);
+        A.CallTo(() => _terminalInfo.IsRedirected).Returns(true);
+        A.CallTo(() => _tableRenderer.FitsHorizontally(forecast, int.MaxValue)).Returns(true);
+
+        _renderer.RenderDaily(forecast, showArt: true, useColour: false, LayoutMode.Horizontal);
+
+        A.CallTo(() => _tableRenderer.RenderHorizontalTable(forecast, true, false, int.MaxValue))
             .MustHaveHappened();
     }
 

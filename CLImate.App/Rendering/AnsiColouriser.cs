@@ -40,8 +40,12 @@ public sealed class AnsiColouriser : IAnsiColouriser
         return colour switch
         {
             AnsiColour.DarkGrey => "\u001b[90m",
+            // A fixed 256-colour grey rather than "bright black" (90): many terminals
+            // brighten the basic colours when bold, which made 1;90 look light grey.
+            AnsiColour.BoldDarkGrey => "\u001b[1;38;5;238m",
             AnsiColour.Red => "\u001b[31m",
             AnsiColour.Yellow => "\u001b[33m",
+            AnsiColour.BoldYellow => "\u001b[1;33m",
             AnsiColour.Blue => "\u001b[34m",
             AnsiColour.Grey => "\u001b[37m",
             AnsiColour.White => "\u001b[97m",

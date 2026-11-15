@@ -127,13 +127,47 @@ public sealed class TableRendererTests
     {
         var forecast = CreateForecast(dayCount: 3);
 
-        // 3-day forecast needs (3*18 + 4) = 58 chars for ASCII art
+        // The narrowest 3-day table is (3*14 + 4) = 46 columns.
         // Use a width just below that threshold
-        _renderer.RenderHorizontalTable(forecast, showArt: true, useColour: false, terminalWidth: 55);
+        _renderer.RenderHorizontalTable(forecast, showArt: true, useColour: false, terminalWidth: 45);
 
-        // With terminalWidth < 58, ASCII art should not be used for 3 days
+        // With terminalWidth < 46, no column width fits, so ASCII art is not used
         A.CallTo(() => _asciiArt.GetArt(A<string>._, A<int?>._))
             .MustNotHaveHappened();
+    }
+
+    [Theory]
+    [InlineData(134, 18)]  // 7*18 + 8
+    [InlineData(133, 16)]  // too narrow for 18, so 7*16 + 8 = 120
+    [InlineData(120, 16)]
+    [InlineData(119, 14)]  // 7*14 + 8 = 106
+    [InlineData(106, 14)]
+    public void RenderHorizontalTable_NarrowsColumnsToFitAndKeepsArt(int terminalWidth, int expectedColumnWidth)
+    {
+        var forecast = CreateForecast(dayCount: 7);
+        A.CallTo(() => _asciiArt.GetArt(A<string>._, A<int?>._))
+            .Returns("  .--.    \n .-(  ).  \n(__.__)   ");
+        var lines = new List<string>();
+        A.CallTo(() => _console.WriteLine(A<string>._)).Invokes((string line) => lines.Add(line));
+
+        _renderer.RenderHorizontalTable(forecast, showArt: true, useColour: false, terminalWidth);
+
+        var expectedTableWidth = 7 * expectedColumnWidth + 8;
+        var tableLines = lines.Where(l => l.StartsWith('┌') || l.StartsWith('│') || l.StartsWith('├') || l.StartsWith('└')).ToList();
+        Assert.NotEmpty(tableLines);
+        Assert.All(tableLines, l => Assert.Equal(expectedTableWidth, l.Length));
+        Assert.Contains(tableLines, l => l.Contains(".-(  )."));
+    }
+
+    [Theory]
+    [InlineData(105, false)]
+    [InlineData(106, true)]
+    [InlineData(200, true)]
+    public void FitsHorizontally_ReflectsNarrowestTableWidth(int terminalWidth, bool expected)
+    {
+        var forecast = CreateForecast(dayCount: 7);
+
+        Assert.Equal(expected, _renderer.FitsHorizontally(forecast, terminalWidth));
     }
 
     private static Forecast CreateForecast(int dayCount)

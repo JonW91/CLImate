@@ -36,6 +36,7 @@ public sealed class CliHelp : ICliHelp
         _console.WriteLine("  --no-art                        Disable ASCII art (use text labels)");
         _console.WriteLine("  --no-colour                     Disable ANSI colours");
         _console.WriteLine("  --colour                        Force ANSI colours on");
+        _console.WriteLine("  --gallery                       Show every weather icon at each size");
         _console.WriteLine("  -h, --help                      Show this help message");
         _console.WriteLine("  -v, --version                   Show version information");
         _console.WriteLine();

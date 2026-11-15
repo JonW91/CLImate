@@ -9,8 +9,13 @@ public interface IArtColouriser
 
 public sealed class ArtColouriser : IArtColouriser
 {
+    // The sun is drawn in bold yellow. Some terminals show thin yellow hyphens
+    // (the horizontal rays) as white unless they are bold, and bolding only the
+    // rays looks uneven, so the whole sun is bold.
+    private const AnsiColour SunColour = AnsiColour.BoldYellow;
+
     private static readonly HashSet<char> CloudChars = new(new[] { '.', '-', '(', ')', '_' });
-    private static readonly HashSet<char> SunChars = new(new[] { 'o', '\\', '/', '|', '*', '~' });
+    private static readonly HashSet<char> SunChars = new(new[] { 'o', '\\', '/', '|', '*' });
     private static readonly HashSet<char> RainChars = new(new[] { '/' });
     private static readonly HashSet<char> DrizzleChars = new(new[] { '\'' });
     private static readonly HashSet<char> SnowChars = new(new[] { '*' });
@@ -34,9 +39,13 @@ public sealed class ArtColouriser : IArtColouriser
         var sb = new StringBuilder();
         var segment = new StringBuilder();
         var current = AnsiColour.Default;
+        var sideRays = string.Equals(key, "partly_cloudy", StringComparison.OrdinalIgnoreCase)
+            ? FindSideRays(art)
+            : null;
 
-        foreach (var ch in art)
+        for (var i = 0; i < art.Length; i++)
         {
+            var ch = art[i];
             if (ch == '\n')
             {
                 FlushSegment();
@@ -44,7 +53,7 @@ public sealed class ArtColouriser : IArtColouriser
                 continue;
             }
 
-            var colour = GetColourForChar(key, ch);
+            var colour = sideRays is not null && sideRays[i] ? SunColour : GetColourForChar(key, ch);
             if (colour != current)
             {
                 FlushSegment();
@@ -69,6 +78,52 @@ public sealed class ArtColouriser : IArtColouriser
         }
     }
 
+    /// <summary>
+    /// Marks the hyphens at the very start and end of each line. In partly-cloudy
+    /// art those are the sun's side rays poking out past the cloud; hyphens inside
+    /// the line belong to the cloud outline and stay grey.
+    /// </summary>
+    private static bool[] FindSideRays(string art)
+    {
+        var rays = new bool[art.Length];
+        var lineStart = 0;
+
+        while (lineStart <= art.Length)
+        {
+            var lineEnd = art.IndexOf('\n', lineStart);
+            if (lineEnd < 0)
+            {
+                lineEnd = art.Length;
+            }
+
+            var first = lineStart;
+            while (first < lineEnd && char.IsWhiteSpace(art[first]))
+            {
+                first++;
+            }
+
+            var last = lineEnd - 1;
+            while (last >= first && char.IsWhiteSpace(art[last]))
+            {
+                last--;
+            }
+
+            for (var i = first; i <= last && art[i] == '-'; i++)
+            {
+                rays[i] = true;
+            }
+
+            for (var i = last; i >= first && art[i] == '-'; i--)
+            {
+                rays[i] = true;
+            }
+
+            lineStart = lineEnd + 1;
+        }
+
+        return rays;
+    }
+
     private static AnsiColour GetColourForChar(string key, char ch)
     {
         if (char.IsWhiteSpace(ch))
@@ -79,7 +134,7 @@ public sealed class ArtColouriser : IArtColouriser
         // Clear sky - everything is sun/yellow
         if (string.Equals(key, "clear", StringComparison.OrdinalIgnoreCase))
         {
-            return AnsiColour.Yellow;
+            return SunColour;
         }
 
         // Partly cloudy - sun chars are yellow, cloud chars are grey
@@ -87,7 +142,7 @@ public sealed class ArtColouriser : IArtColouriser
         {
             if (SunChars.Contains(ch))
             {
-                return AnsiColour.Yellow;
+                return SunColour;
             }
 
             if (CloudChars.Contains(ch))
@@ -98,12 +153,12 @@ public sealed class ArtColouriser : IArtColouriser
             return AnsiColour.Default;
         }
 
-        // Thunderstorm - lightning is yellow, clouds are dark grey, hail is white
+        // Thunderstorm - lightning is bold yellow, clouds are bold dark grey, hail is white
         if (key.Contains("thunderstorm", StringComparison.OrdinalIgnoreCase))
         {
             if (LightningChars.Contains(ch))
             {
-                return AnsiColour.Yellow;
+                return AnsiColour.BoldYellow;
             }
 
             if (SnowChars.Contains(ch))
@@ -113,7 +168,7 @@ public sealed class ArtColouriser : IArtColouriser
 
             if (CloudChars.Contains(ch))
             {
-                return AnsiColour.DarkGrey;
+                return AnsiColour.BoldDarkGrey;
             }
 
             return AnsiColour.Default;
@@ -135,7 +190,8 @@ public sealed class ArtColouriser : IArtColouriser
             return AnsiColour.Default;
         }
 
-        // Rain/drizzle - slashes and drizzle drops are blue, asterisks (freezing) are white, clouds are grey
+        // Rain/drizzle - slashes and drizzle drops are blue, asterisks (freezing) are white,
+        // rain clouds are bold dark grey, drizzle clouds are grey
         if (key.Contains("rain", StringComparison.OrdinalIgnoreCase)
             || key.Contains("drizzle", StringComparison.OrdinalIgnoreCase))
         {
@@ -151,7 +207,10 @@ public sealed class ArtColouriser : IArtColouriser
 
             if (CloudChars.Contains(ch))
             {
-                return AnsiColour.DarkGrey;
+                // Rain falls from thick, dark cloud; drizzle from thin, paler cloud.
+                return key.Contains("rain", StringComparison.OrdinalIgnoreCase)
+                    ? AnsiColour.BoldDarkGrey
+                    : AnsiColour.Grey;
             }
 
             return AnsiColour.Default;

@@ -52,7 +52,19 @@ public sealed class ForecastRenderer : IForecastRenderer
 
         if (useHorizontal)
         {
-            _tableRenderer.RenderHorizontalTable(forecast, showArt, useColour, _terminalInfo.Width);
+            // Output going to a file or pipe has no width to wrap at.
+            var width = _terminalInfo.IsRedirected ? int.MaxValue : _terminalInfo.Width;
+
+            if (layout == LayoutMode.Horizontal && !_tableRenderer.FitsHorizontally(forecast, width))
+            {
+                // A table wider than the terminal wraps into an unreadable mess.
+                _console.WriteLine();
+                _console.WriteLine($"Terminal is too narrow for the table view ({width} columns). Showing the list view instead.");
+                RenderDailyVertical(forecast, showArt, useColour);
+                return;
+            }
+
+            _tableRenderer.RenderHorizontalTable(forecast, showArt, useColour, width);
             return;
         }
 
@@ -294,16 +306,19 @@ public sealed class ForecastRenderer : IForecastRenderer
             foreach (var hour in blockHours)
             {
                 var descriptor = _weatherCodes.Describe(hour.WeatherCode);
-                var temp = ColouriseValue(hour.Temperature, units.Temperature, colourEnabled);
+                // Pad before colouring: colour codes are invisible but count towards
+                // string length, so padding the coloured text leaves columns ragged.
+                var tempText = $"{FormatValue(hour.Temperature)}{units.Temperature}".PadLeft(7);
+                var temp = _colouriser.Apply(tempText, _temperatureColours.GetColour(hour.Temperature), colourEnabled);
                 var precipValue = double.IsNaN(hour.Precipitation) ? "n/a" : hour.Precipitation.ToString("0.#");
                 var windValue = double.IsNaN(hour.WindSpeed) ? "n/a" : hour.WindSpeed.ToString("0");
 
                 // Compact format: TIME | TEMP | WEATHER | PRECIP | WIND
-                var weatherShort = descriptor.Description.Length > 15 
-                    ? descriptor.Description[..12] + "..." 
-                    : descriptor.Description.PadRight(15);
+                var weatherShort = descriptor.Description.Length > 16
+                    ? descriptor.Description[..13] + "..."
+                    : descriptor.Description.PadRight(16);
 
-                _console.WriteLine($"│  {hour.TimeLabel}  {temp,8}  {weatherShort}  Rain: {precipValue,4}{units.Precipitation}  Wind: {windValue}{units.WindSpeed}");
+                _console.WriteLine($"│  {hour.TimeLabel}  {temp}  {weatherShort}  Rain: {precipValue,4}{units.Precipitation}  Wind: {windValue}{units.WindSpeed}");
             }
 
             _console.WriteLine(BuildBoxBottom());

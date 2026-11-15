@@ -121,6 +121,10 @@ public sealed class CliOptionsParser : ICliOptionsParser
                 case "-V" or "--vertical":
                     options.Layout = LayoutMode.Vertical;
                     continue;
+
+                case "--gallery":
+                    options.ShowGallery = true;
+                    continue;
             }
 
             if (arg.StartsWith("-", StringComparison.Ordinal))

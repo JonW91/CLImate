@@ -131,6 +131,9 @@ climate --no-colour London
 
 # Disable ASCII art (show text labels instead)
 climate --no-art London
+
+# Show every weather icon at each size (no location or network needed)
+climate --gallery
 ```
 
 ### Advanced Options
